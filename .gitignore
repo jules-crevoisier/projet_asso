@@ -1,8 +1,6 @@
-__pycache__/
-*.py[cod]
-*.sqlite3
-/staticfiles/
+node_modules/
+data/
+public/css/app.css
 .env
-.venv/
-venv/
+*.log
 .DS_Store

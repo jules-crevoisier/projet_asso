@@ -1,0 +1,8 @@
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div class="min-w-0">
+    <% if (locals.eyebrow) { %><p class="mb-1 text-sm font-medium text-brand-600"><%= eyebrow %></p><% } %>
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]"><%= heading %></h1>
+    <% if (locals.subtitle) { %><p class="mt-1.5 text-[15px] text-slate-500"><%= subtitle %></p><% } %>
+  </div>
+  <% if (locals.actions) { %><div class="flex flex-wrap items-center gap-2"><%- actions %></div><% } %>
+</div>

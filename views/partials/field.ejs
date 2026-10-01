@@ -1,0 +1,20 @@
+<%
+  // Paramètres : name, label, type, value, error, help, placeholder, required, options, rows, attrs, cls
+  const id = `f-${name}`;
+  const t = locals.type || 'text';
+  const v = locals.value ?? '';
+  const err = locals.error;
+%>
+<div class="<%= locals.cls || '' %>">
+  <% if (locals.label) { %><label for="<%= id %>" class="label"><%= label %><% if (locals.required) { %> <span class="text-red-500">*</span><% } %></label><% } %>
+  <% if (t === 'textarea') { %>
+    <textarea id="<%= id %>" name="<%= name %>" rows="<%= locals.rows || 4 %>" class="input <%= err ? 'input-error' : '' %>" placeholder="<%= locals.placeholder || '' %>" <%= locals.required ? 'required' : '' %> <%- locals.attrs || '' %>><%= v %></textarea>
+  <% } else if (t === 'select') { %>
+    <select id="<%= id %>" name="<%= name %>" class="input <%= err ? 'input-error' : '' %>" <%= locals.required ? 'required' : '' %> <%- locals.attrs || '' %>>
+      <% (locals.options || []).forEach(([val, text]) => { %><option value="<%= val %>" <%= String(val) === String(v) ? 'selected' : '' %>><%= text %></option><% }) %>
+    </select>
+  <% } else { %>
+    <input id="<%= id %>" name="<%= name %>" type="<%= t %>" value="<%= v %>" class="input <%= err ? 'input-error' : '' %>" placeholder="<%= locals.placeholder || '' %>" <%= locals.required ? 'required' : '' %> <%- locals.attrs || '' %>>
+  <% } %>
+  <% if (err) { %><p class="field-error"><%= err %></p><% } else if (locals.help) { %><p class="field-help"><%= help %></p><% } %>
+</div>

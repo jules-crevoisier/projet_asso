@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title ? `${title} · ${platformName}` : platformName %></title>
+  <meta name="description" content="La plateforme de coordination des associations de <%= city %> : calendrier partagé, événements, entraide.">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/vendor/inter/files/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="alternate" type="text/calendar" title="Événements publics" href="/evenements/ical/public.ics">
+  <script src="/static/js/app.js" defer></script>
+  <% (locals.scripts || []).forEach((src) => { %><script src="<%= src %>" defer></script>
+  <% }) %>
+</head>
+<body class="h-full">
+<% if (user) { %>
+  <div class="min-h-full">
+    <%- include('partials/sidebar') %>
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-white/80 px-4 backdrop-blur lg:hidden">
+        <button type="button" class="btn btn-ghost btn-icon -ml-2" data-sidebar-open aria-label="Ouvrir le menu"><%- icon('Menu', 'size-5') %></button>
+        <a href="/tableau-de-bord" class="flex items-center gap-2 font-semibold"><%- include('partials/logo', { size: 'size-7' }) %><%= platformName %></a>
+      </header>
+      <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+        <%- include('partials/flash') %>
+        <%- body %>
+      </main>
+    </div>
+  </div>
+<% } else { %>
+  <div class="flex min-h-full flex-col">
+    <%- include('partials/topnav') %>
+    <main class="flex-1">
+      <% if (path === '/') { %>
+        <% if (flash.length) { %><div class="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-8"><%- include('partials/flash') %></div><% } %>
+        <%- body %>
+      <% } else { %>
+        <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <%- include('partials/flash') %>
+          <%- body %>
+        </div>
+      <% } %>
+    </main>
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div class="flex items-center gap-2"><%- include('partials/logo', { size: 'size-6' }) %><span class="font-medium text-slate-700"><%= platformName %></span> — fait à <%= city %>, pour les associations de <%= city %>.</div>
+        <div class="flex gap-4"><a class="hover:text-slate-900" href="/evenements">Calendrier</a><a class="hover:text-slate-900" href="/associations">Annuaire</a><a class="hover:text-slate-900" href="/evenements/ical/public.ics">Flux iCal</a></div>
+      </div>
+    </footer>
+  </div>
+<% } %>
+</body>
+</html>

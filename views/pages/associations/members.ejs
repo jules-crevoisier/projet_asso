@@ -1,0 +1,41 @@
+<%- include('../../partials/page-header', {
+  eyebrow: association.name,
+  heading: 'Membres',
+  subtitle: 'Les membres publient au nom de l’association. Les responsables gèrent en plus la fiche et l’équipe.',
+  actions: `<a href="/associations/${association.slug}" class="btn btn-secondary">${icon('ChevronLeft')}Retour à la fiche</a>`,
+}) %>
+
+<div class="card overflow-hidden">
+  <div class="divide-list">
+    <% memberships.forEach((m) => { const base = `/associations/${association.slug}/membres/${m.id}`; %>
+      <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+        <div class="flex min-w-0 flex-1 items-center gap-3">
+          <%- include('../../partials/avatar', { first: m.first_name, last: m.last_name, size: 'size-10 text-sm' }) %>
+          <div class="min-w-0">
+            <p class="flex flex-wrap items-center gap-2 font-medium">
+              <%= m.first_name %> <%= m.last_name %>
+              <% if (m.status === 'pending') { %><span class="badge badge-amber">Demande en attente</span>
+              <% } else if (m.role === 'admin') { %><span class="badge badge-brand"><%- icon('Crown', 'size-3') %>Responsable</span>
+              <% } else { %><span class="badge badge-slate">Membre</span><% } %>
+            </p>
+            <p class="truncate text-sm text-slate-500"><a class="hover:underline" href="mailto:<%= m.email %>"><%= m.email %></a><%= m.phone ? ` · ${m.phone}` : '' %></p>
+            <% if (m.message && m.status === 'pending') { %><p class="mt-1 text-sm italic text-slate-600">« <%= m.message %> »</p><% } %>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <% if (m.status === 'pending') { %>
+            <form method="post" action="<%= base %>/retirer"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Refuser</button></form>
+            <form method="post" action="<%= base %>/accepter"><%- include('../../partials/csrf') %><button class="btn btn-primary btn-sm"><%- icon('Check', 'size-3.5') %>Accepter</button></form>
+          <% } else { %>
+            <% if (m.role === 'member') { %>
+              <form method="post" action="<%= base %>/promouvoir"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm"><%- icon('Crown', 'size-3.5') %>Nommer responsable</button></form>
+            <% } else { %>
+              <form method="post" action="<%= base %>/retrograder"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Retirer le rôle</button></form>
+            <% } %>
+            <form method="post" action="<%= base %>/retirer" data-confirm="Retirer <%= m.first_name %> de l'association ?"><%- include('../../partials/csrf') %><button class="btn btn-danger btn-sm"><%- icon('Trash2', 'size-3.5') %></button></form>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>

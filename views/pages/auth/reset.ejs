@@ -1,0 +1,12 @@
+<%- include('_shell-start', { heading: 'Nouveau mot de passe' }) %>
+  <% if (!valid) { %>
+    <p class="text-center text-sm text-slate-600">Ce lien a expiré ou a déjà été utilisé.</p>
+    <a href="/mot-de-passe-oublie" class="btn btn-primary mt-5 w-full">Demander un nouveau lien</a>
+  <% } else { %>
+    <form method="post" class="space-y-5">
+      <%- include('../../partials/csrf') %>
+      <%- include('../../partials/field', { name: 'password', label: 'Nouveau mot de passe', type: 'password', error, help: '8 caractères minimum.', required: true, attrs: 'autocomplete="new-password" minlength="8" autofocus' }) %>
+      <button class="btn btn-primary w-full py-2.5">Enregistrer</button>
+    </form>
+  <% } %>
+<%- include('_shell-end') %>

@@ -1,0 +1,78 @@
+<% const k = POST_KINDS[post.kind] || POST_KINDS.other; %>
+<div class="mb-6"><a href="/annonces" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900"><%- icon('ChevronLeft') %>Annonces</a></div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <article class="card card-pad sm:p-8">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge badge-<%= k.tone %>"><%- icon(k.icon, 'size-3') %><%= k.label %></span>
+        <% if (post.is_closed) { %><span class="badge badge-slate"><%- icon('Check', 'size-3') %>Résolue</span><% } %>
+      </div>
+      <h1 class="mt-3 text-2xl font-bold tracking-tight"><%= post.title %></h1>
+      <div class="mt-3 flex items-center gap-2 text-sm text-slate-500">
+        <%- include('../../partials/avatar', { first: post.first_name, last: post.last_name, size: 'size-6 text-[10px]' }) %>
+        <span><span class="font-medium text-slate-700"><%= post.first_name %> <%= post.last_name %></span> pour <a class="font-medium text-slate-700 hover:text-brand-700" href="/associations/<%= post.association_slug %>"><%= post.association_name %></a> · <%= fmt.ago(post.created_at) %></span>
+      </div>
+      <div class="prose-text mt-6"><%= post.body %></div>
+      <% if (canEdit) { %>
+        <div class="mt-8 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
+          <form method="post" action="/annonces/<%= post.id %>/cloturer"><%- include('../../partials/csrf') %>
+            <button class="btn <%= post.is_closed ? 'btn-secondary' : 'btn-primary' %>"><%- icon(post.is_closed ? 'RotateCcw' : 'CircleCheck') %><%= post.is_closed ? 'Rouvrir' : 'Marquer comme résolue' %></button>
+          </form>
+          <a href="/annonces/<%= post.id %>/modifier" class="btn btn-secondary"><%- icon('Pencil') %>Modifier</a>
+          <form method="post" action="/annonces/<%= post.id %>/supprimer" data-confirm="Supprimer cette annonce ?"><%- include('../../partials/csrf') %><button class="btn btn-danger"><%- icon('Trash2') %>Supprimer</button></form>
+        </div>
+      <% } %>
+    </article>
+
+    <section class="card overflow-hidden" id="reponses">
+      <div class="card-header"><h2 class="card-title">Réponses</h2><span class="text-sm text-slate-500"><%= replies.length %></span></div>
+      <div class="divide-list">
+        <% replies.forEach((r) => { %>
+          <div class="flex gap-3 px-5 py-4 sm:px-6">
+            <%- include('../../partials/avatar', { first: r.first_name, last: r.last_name, size: 'size-9 text-xs' }) %>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-x-2 text-sm">
+                <span class="font-semibold"><%= r.first_name %> <%= r.last_name %></span>
+                <% if (r.association_name) { %><span class="badge badge-slate"><%= r.association_name %></span><% } %>
+                <span class="text-slate-400"><%= fmt.ago(r.created_at) %></span>
+                <% if (r.author_id === user.id || canEdit) { %>
+                  <form method="post" action="/annonces/reponses/<%= r.id %>/supprimer" class="ml-auto" data-confirm="Supprimer cette réponse ?"><%- include('../../partials/csrf') %><button class="text-slate-300 hover:text-red-500" aria-label="Supprimer"><%- icon('Trash2', 'size-3.5') %></button></form>
+                <% } %>
+              </div>
+              <p class="prose-text mt-1 text-sm"><%= r.body %></p>
+            </div>
+          </div>
+        <% }) %>
+        <% if (!replies.length) { %><p class="px-5 py-6 text-center text-sm text-slate-500 sm:px-6">Pas encore de réponse. Lancez-vous !</p><% } %>
+      </div>
+      <% if (!post.is_closed) { %>
+        <form method="post" action="/annonces/<%= post.id %>/repondre" class="space-y-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
+          <%- include('../../partials/csrf') %>
+          <textarea name="body" rows="3" class="input" placeholder="Votre réponse…" required></textarea>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <% if (myAssociations.length) { %>
+              <select name="association_id" class="input w-auto py-1.5 text-sm" aria-label="Répondre au nom de">
+                <option value="">À titre personnel</option>
+                <% myAssociations.forEach((a) => { %><option value="<%= a.id %>">Au nom de <%= a.name %></option><% }) %>
+              </select>
+            <% } else { %><span></span><% } %>
+            <button class="btn btn-primary btn-sm"><%- icon('Send', 'size-3.5') %>Répondre</button>
+          </div>
+        </form>
+      <% } %>
+    </section>
+  </div>
+
+  <aside class="card card-pad h-fit">
+    <h2 class="card-title mb-4">Contact</h2>
+    <a href="/associations/<%= post.association_slug %>" class="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-900/5 hover:bg-slate-100">
+      <%- include('../../partials/avatar', { first: post.association_name, color: post.association_color, size: 'size-10 text-xs rounded-xl' }) %>
+      <span class="text-sm font-semibold"><%= post.association_name %></span>
+    </a>
+    <ul class="space-y-3 text-sm">
+      <% if (post.author_email) { %><li class="flex items-center gap-3"><%- icon('Mail', 'size-4 text-slate-400') %><a class="truncate text-brand-700 hover:underline" href="mailto:<%= post.author_email %>"><%= post.author_email %></a></li><% } %>
+      <% if (post.association_phone) { %><li class="flex items-center gap-3"><%- icon('Phone', 'size-4 text-slate-400') %><%= post.association_phone %></li><% } %>
+    </ul>
+  </aside>
+</div>

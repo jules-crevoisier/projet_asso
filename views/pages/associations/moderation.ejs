@@ -1,0 +1,21 @@
+<%- include('../../partials/page-header', { heading: 'Modération', subtitle: 'Associations en attente de validation. Vérifiez qu’elles existent bien avant de les valider.' }) %>
+
+<div class="card overflow-hidden">
+  <% if (pending.length) { %>
+    <div class="divide-list">
+      <% pending.forEach((a) => { %>
+        <div class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
+          <%- include('../../partials/avatar', { first: a.name, color: a.color, size: 'size-11 text-sm rounded-xl' }) %>
+          <div class="min-w-0 flex-1">
+            <a href="/associations/<%= a.slug %>" class="font-semibold hover:text-brand-700"><%= a.name %></a>
+            <p class="text-sm text-slate-600"><%= a.short_description %></p>
+            <p class="mt-1 text-xs text-slate-500"><%= CATEGORIES[a.category] %> · inscrite <%= fmt.ago(a.created_at) %><% if (a.creator_email) { %> par <%= a.first_name %> <%= a.last_name %> (<a class="hover:underline" href="mailto:<%= a.creator_email %>"><%= a.creator_email %></a>)<% } %></p>
+          </div>
+          <form method="post" action="/associations/<%= a.slug %>/valider"><%- include('../../partials/csrf') %><button class="btn btn-primary"><%- icon('BadgeCheck') %>Valider</button></form>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <%- include('../../partials/empty', { iconName: 'CircleCheck', heading: 'Tout est à jour', text: 'Aucune association en attente de validation.' }) %>
+  <% } %>
+</div>

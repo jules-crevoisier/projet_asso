@@ -1,0 +1,116 @@
+<%
+  const hour = Number(new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', hour12: false, timeZone: 'Europe/Paris' }).format(new Date()));
+  const hello = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+%>
+<%- include('../partials/page-header', {
+  eyebrow: fmt.dateYear(new Date()).replace(/^./, (c) => c.toUpperCase()),
+  heading: `${hello} ${user.first_name} 👋`,
+  subtitle: 'Voici ce qui se passe entre les associations.',
+  actions: `<a href="/annonces/nouvelle" class="btn btn-secondary">${icon('Megaphone')}Annonce</a><a href="/evenements/nouveau" class="btn btn-primary">${icon('CalendarPlus')}Nouvel événement</a>`,
+}) %>
+
+<% if (pending.length) { %>
+  <div id="demandes" class="card mb-6 overflow-hidden ring-brand-600/20">
+    <div class="flex items-center gap-3 bg-brand-50/60 px-5 py-3.5 sm:px-6">
+      <%- icon('Inbox', 'size-5 text-brand-600') %>
+      <p class="text-sm font-semibold text-brand-900"><%= plural(pending.length, 'demande') %> d'adhésion à traiter</p>
+    </div>
+    <div class="divide-list">
+      <% pending.forEach((m) => { %>
+        <div class="flex flex-wrap items-center gap-4 px-5 py-3 sm:px-6">
+          <%- include('../partials/avatar', { first: m.first_name, last: m.last_name }) %>
+          <div class="min-w-0 flex-1 text-sm">
+            <p><span class="font-semibold"><%= m.first_name %> <%= m.last_name %></span> <span class="text-slate-500">souhaite rejoindre</span> <a class="font-medium text-brand-700 hover:underline" href="/associations/<%= m.slug %>"><%= m.association_name %></a></p>
+            <% if (m.message) { %><p class="truncate text-slate-500">« <%= m.message %> »</p><% } %>
+          </div>
+          <div class="flex gap-2">
+            <form method="post" action="/associations/<%= m.slug %>/membres/<%= m.id %>/retirer"><%- include('../partials/csrf') %><button class="btn btn-secondary btn-sm">Refuser</button></form>
+            <form method="post" action="/associations/<%= m.slug %>/membres/<%= m.id %>/accepter"><%- include('../partials/csrf') %><button class="btn btn-primary btn-sm"><%- icon('Check', 'size-3.5') %>Accepter</button></form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+
+<% if (!myAssociations.length) { %>
+  <div class="card relative mb-6 overflow-hidden">
+    <div class="absolute inset-y-0 right-0 hidden w-1/3 bg-gradient-to-l from-brand-50 to-transparent sm:block"></div>
+    <div class="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
+      <span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-lg shadow-brand-600/30"><%- icon('Sparkles', 'size-7') %></span>
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold">Pour commencer, rejoignez votre association</h2>
+        <p class="mt-1 text-sm text-slate-600">Elle est peut-être déjà inscrite. Sinon, créez sa fiche en deux minutes.
+          <% if (myPending.length) { %><br><span class="font-medium text-amber-700">En attente : <%= myPending.map((m) => m.name).join(', ') %></span><% } %></p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="/associations" class="btn btn-primary"><%- icon('Search') %>Trouver mon association</a>
+        <a href="/associations/nouvelle" class="btn btn-secondary"><%- icon('Plus') %>L'inscrire</a>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <% if (myAssociations.length) { %>
+      <section class="card overflow-hidden">
+        <div class="card-header"><h2 class="card-title">Mes prochains événements</h2><a class="card-link" href="/evenements?mes=1">Mon calendrier <%- icon('ArrowRight', 'size-3.5') %></a></div>
+        <div class="divide-list">
+          <% if (myEvents.length) { myEvents.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) } else { %>
+            <%- include('../partials/empty', { iconName: 'CalendarPlus', heading: 'Rien de prévu', text: 'Ajoutez les dates de vos associations au calendrier commun.', actionHref: '/evenements/nouveau', actionLabel: 'Ajouter un événement' }) %>
+          <% } %>
+        </div>
+      </section>
+    <% } %>
+    <section class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">Prochainement à <%= city %></h2><a class="card-link" href="/evenements">Calendrier <%- icon('ArrowRight', 'size-3.5') %></a></div>
+      <div class="divide-list">
+        <% if (upcoming.length) { upcoming.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) } else { %>
+          <%- include('../partials/empty', { iconName: 'CalendarDays', heading: 'Aucun événement à venir' }) %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+
+  <div class="space-y-6">
+    <% if (myAssociations.length) { %>
+      <section class="card overflow-hidden">
+        <div class="card-header"><h2 class="card-title">Mes associations</h2><a class="card-link" href="/associations/nouvelle"><%- icon('Plus', 'size-3.5') %></a></div>
+        <div class="divide-list">
+          <% myAssociations.forEach((a) => { %>
+            <a href="/associations/<%= a.slug %>" class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
+              <%- include('../partials/avatar', { first: a.name, color: a.color, size: 'size-9 text-xs rounded-xl' }) %>
+              <span class="min-w-0 flex-1 truncate text-sm font-medium"><%= a.name %></span>
+              <% if (!a.can_publish) { %><span class="badge badge-amber"><%- icon('Hourglass', 'size-3') %>En validation</span><% } %>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+
+    <% if (volunteering.length) { %>
+      <section class="card overflow-hidden">
+        <div class="card-header"><h2 class="card-title">Je suis bénévole</h2></div>
+        <div class="divide-list">
+          <% volunteering.forEach((v) => { %>
+            <a href="/evenements/<%= v.id %>" class="flex items-center gap-3 px-5 py-3 text-sm hover:bg-slate-50 sm:px-6">
+              <%- icon('HandHeart', 'size-4 text-amber-500') %>
+              <span class="min-w-0 flex-1 truncate font-medium"><%= v.title %></span>
+              <span class="text-xs text-slate-500"><%= fmt.short(v.start_at) %></span>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+
+    <section class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">Dernières annonces</h2><a class="card-link" href="/annonces">Toutes <%- icon('ArrowRight', 'size-3.5') %></a></div>
+      <div class="divide-list">
+        <% if (posts.length) { posts.forEach((post) => { %><%- include('../partials/post-row', { post }) %><% }) } else { %>
+          <%- include('../partials/empty', { iconName: 'Megaphone', heading: 'Aucune annonce', text: 'Besoin de bras ou de matériel ? Demandez !' }) %>
+        <% } %>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,6 +1,0 @@
-<div>
-  <span class="badge {% if post.kind == 'volunteers' or post.kind == 'borrow' %}badge-warning{% elif post.kind == 'lend' %}badge-success{% elif post.kind == 'partnership' %}badge-primary{% endif %}">{{ post.get_kind_display }}</span>
-  {% if post.is_closed %}<span class="badge">Clôturée</span>{% endif %}
-  <a class="title" href="{{ post.get_absolute_url }}" style="font-weight:600;color:var(--text)">{{ post.title }}</a>
-  <div class="meta"><span>{{ post.association }}</span><span>il y a {{ post.created_at|timesince }}</span>{% if post.nb_replies %}<span>{{ post.nb_replies }} réponse{{ post.nb_replies|pluralize }}</span>{% endif %}</div>
-</div>

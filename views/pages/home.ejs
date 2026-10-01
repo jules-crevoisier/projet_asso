@@ -1,0 +1,103 @@
+<section class="relative isolate overflow-hidden border-b border-slate-200/70 bg-white">
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_70%_0%,rgba(99,102,241,0.14),transparent_70%),radial-gradient(40%_50%_at_0%_100%,rgba(236,72,153,0.08),transparent_70%)]"></div>
+  <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]"></div>
+  <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:px-8 lg:py-24">
+    <div>
+      <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-slate-600 shadow-xs ring-1 ring-slate-200">
+        <span class="size-1.5 rounded-full bg-emerald-500"></span><%= stats.associations %> associations · <%= stats.events %> événements à venir
+      </span>
+      <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-[56px] lg:leading-[1.05]">
+        Les associations de <%= city %>,<br><span class="bg-gradient-to-r from-brand-600 via-violet-600 to-pink-500 bg-clip-text text-transparent">enfin coordonnées.</span>
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
+        Un calendrier commun pour ne plus organiser deux événements le même jour, de l'entraide pour se prêter du matériel et trouver des bénévoles, et un annuaire pour se connaître.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/inscription" class="btn btn-primary btn-lg">Inscrire mon association <%- icon('ArrowRight') %></a>
+        <a href="/evenements" class="btn btn-secondary btn-lg"><%- icon('CalendarDays') %>Voir le calendrier</a>
+      </div>
+      <p class="mt-4 text-sm text-slate-500">Gratuit · Sans publicité · Un compte par bénévole</p>
+    </div>
+
+    <div class="relative">
+      <div class="absolute -inset-4 -z-10 rounded-[32px] bg-gradient-to-br from-brand-200/50 to-pink-200/40 blur-2xl"></div>
+      <div class="card overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div class="flex items-center gap-2 font-semibold"><%- icon('CalendarDays', 'size-5 text-brand-600') %>Prochainement</div>
+          <span class="badge badge-emerald"><span class="size-1.5 rounded-full bg-emerald-500"></span>En direct</span>
+        </div>
+        <div class="divide-list">
+          <% if (events.length) { events.slice(0, 3).forEach((event) => { %>
+            <%- include('../partials/event-row', { event }) %>
+          <% }) } else { %>
+            <%- include('../partials/empty', { iconName: 'CalendarDays', heading: 'Le calendrier vous attend', text: 'Les premiers événements publics apparaîtront ici.' }) %>
+          <% } %>
+        </div>
+      </div>
+      <div class="absolute -bottom-6 -left-6 hidden w-64 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-900/5 sm:block">
+        <div class="flex items-start gap-3">
+          <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-600/20"><%- icon('TriangleAlert', 'size-5') %></span>
+          <div class="text-sm"><p class="font-semibold">Créneau déjà pris</p><p class="text-slate-500">2 événements le samedi 10 — on décale ?</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+  <div class="max-w-2xl">
+    <p class="text-sm font-semibold text-brand-600">Tout au même endroit</p>
+    <h2 class="mt-2 text-3xl font-bold tracking-tight">Moins de mails, plus d'événements réussis</h2>
+  </div>
+  <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <% [
+      ['CalendarDays', 'Calendrier partagé', 'Toutes les dates des associations, avec une alerte dès qu’un créneau est déjà pris.', 'from-brand-500 to-violet-500'],
+      ['Handshake', 'Co-organisation', 'Rejoignez l’événement d’une autre asso : co-organiser, tenir un stand, prêter main-forte.', 'from-pink-500 to-rose-500'],
+      ['Megaphone', 'Entraide', 'Bénévoles, prêt de matériel, salles, partenariats : postez, on vous répond.', 'from-amber-500 to-orange-500'],
+      ['Rss', 'Dans votre agenda', 'Abonnez Google Agenda, Outlook ou votre téléphone : tout se synchronise.', 'from-emerald-500 to-teal-500'],
+    ].forEach(([ic, t, d, grad]) => { %>
+      <div class="card card-pad">
+        <span class="grid size-11 place-items-center rounded-xl bg-gradient-to-br <%= grad %> text-white shadow-sm"><%- icon(ic, 'size-5') %></span>
+        <h3 class="mt-5 font-semibold text-slate-900"><%= t %></h3>
+        <p class="mt-2 text-sm leading-relaxed text-slate-600"><%= d %></p>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<section class="border-y border-slate-200/70 bg-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-3 lg:px-8">
+    <div>
+      <p class="text-sm font-semibold text-brand-600">En 3 minutes</p>
+      <h2 class="mt-2 text-3xl font-bold tracking-tight">Comment ça marche</h2>
+      <p class="mt-4 text-slate-600">Chaque bénévole a son propre compte. Les responsables gardent la main sur qui publie au nom de l'association.</p>
+    </div>
+    <ol class="grid gap-6 sm:grid-cols-3 lg:col-span-2">
+      <% [
+        ['Créez votre compte', 'Avec votre e-mail, en quelques secondes.'],
+        ['Rejoignez votre asso', 'Ou inscrivez-la : un modérateur la valide.'],
+        ['Coordonnez-vous', 'Publiez vos dates, repérez les conflits, entraidez-vous.'],
+      ].forEach(([t, d], i) => { %>
+        <li class="relative rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-900/5">
+          <span class="text-4xl font-bold text-brand-200"><%= i + 1 %></span>
+          <h3 class="mt-3 font-semibold"><%= t %></h3>
+          <p class="mt-1 text-sm text-slate-600"><%= d %></p>
+        </li>
+      <% }) %>
+    </ol>
+  </div>
+</section>
+
+<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+  <div class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-14 text-center sm:px-12">
+    <div class="absolute inset-0 bg-[radial-gradient(50%_80%_at_50%_0%,rgba(99,102,241,0.45),transparent_70%)]"></div>
+    <div class="relative">
+      <h2 class="text-3xl font-bold tracking-tight text-white">Votre association a sa place ici</h2>
+      <p class="mx-auto mt-3 max-w-xl text-slate-300">Rejoignez les associations de <%= city %> qui se coordonnent déjà sur <%= platformName %>.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="/inscription" class="btn btn-lg bg-white text-slate-900 hover:bg-slate-100">Créer un compte gratuit</a>
+        <a href="/associations" class="btn btn-lg text-white ring-1 ring-inset ring-white/20 hover:bg-white/10">Parcourir l'annuaire</a>
+      </div>
+    </div>
+  </div>
+</section>

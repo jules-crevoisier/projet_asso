@@ -1,0 +1,43 @@
+<%- include('../../partials/page-header', {
+  heading: past ? 'Événements passés' : 'Événements à venir',
+  subtitle: `${events.length} événement${events.length > 1 ? 's' : ''}`,
+  actions: `<a href="/evenements${query(filters, {})}" class="btn btn-secondary">${icon('CalendarDays')}Vue calendrier</a>` + (user ? `<a href="/evenements/nouveau" class="btn btn-primary">${icon('CalendarPlus')}Nouvel événement</a>` : ''),
+}) %>
+
+<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="segmented">
+    <a href="/evenements/liste<%= query(filters, {}) %>" class="<%= !past ? 'active' : '' %>">À venir</a>
+    <a href="/evenements/liste<%= query(filters, { passes: '1' }) %>" class="<%= past ? 'active' : '' %>">Passés</a>
+  </div>
+  <form method="get" class="flex flex-wrap items-center gap-2" data-autosubmit>
+    <% if (past) { %><input type="hidden" name="passes" value="1"><% } %>
+    <select name="association" class="input w-auto py-1.5" aria-label="Association">
+      <option value="">Toutes les associations</option>
+      <% associations.forEach((a) => { %><option value="<%= a.slug %>" <%= filters.association === a.slug ? 'selected' : '' %>><%= a.name %></option><% }) %>
+    </select>
+    <select name="theme" class="input w-auto py-1.5" aria-label="Thème">
+      <option value="">Tous les thèmes</option>
+      <% Object.entries(CATEGORIES).forEach(([v, l]) => { %><option value="<%= v %>" <%= filters.theme === v ? 'selected' : '' %>><%= l %></option><% }) %>
+    </select>
+    <% if (user) { %>
+      <label class="chip cursor-pointer has-[:checked]:bg-slate-900 has-[:checked]:text-white has-[:checked]:ring-slate-900">
+        <input type="checkbox" name="mes" value="1" class="sr-only" <%= filters.mes ? 'checked' : '' %>><%- icon('Users', 'size-3.5') %>Mes associations
+      </label>
+    <% } %>
+    <noscript><button class="btn btn-secondary">Filtrer</button></noscript>
+  </form>
+</div>
+
+<div class="card overflow-hidden">
+  <% if (events.length) {
+    let lastMonth = '';
+    events.forEach((event) => {
+      const month = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(new Date(event.start_at));
+      if (month !== lastMonth) { lastMonth = month; %>
+        <div class="sticky top-14 z-10 border-y border-slate-100 bg-slate-50/95 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur first:border-t-0 sm:px-6 lg:top-0"><%= month %></div>
+      <% } %>
+      <%- include('../../partials/event-row', { event }) %>
+  <% }) } else { %>
+    <%- include('../../partials/empty', { iconName: 'CalendarDays', heading: 'Aucun événement', text: 'Modifiez les filtres ou ajoutez le premier !', actionHref: user ? '/evenements/nouveau' : null, actionLabel: 'Nouvel événement' }) %>
+  <% } %>
+</div>

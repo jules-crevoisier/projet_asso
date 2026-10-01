@@ -1,0 +1,73 @@
+<%- include('../../partials/page-header', { heading: 'Mon profil', subtitle: user.email }) %>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Informations personnelles</h2></div>
+      <form method="post" action="/profil" class="card-pad space-y-5">
+        <%- include('../../partials/csrf') %>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <%- include('../../partials/field', { name: 'firstName', label: 'Prénom', value: values.firstName, error: errors.firstName, required: true }) %>
+          <%- include('../../partials/field', { name: 'lastName', label: 'Nom', value: values.lastName, error: errors.lastName, required: true }) %>
+        </div>
+        <%- include('../../partials/field', { name: 'phone', label: 'Téléphone', type: 'tel', value: values.phone, help: 'Visible uniquement par les organisateurs des événements où vous êtes bénévole.' }) %>
+        <%- include('../../partials/field', { name: 'bio', label: 'Présentation', type: 'textarea', value: values.bio, rows: 3, placeholder: 'Quelques mots sur vous, vos compétences…' }) %>
+        <div class="flex justify-end"><button class="btn btn-primary">Enregistrer</button></div>
+      </form>
+    </section>
+
+    <section class="card" id="agenda">
+      <div class="card-header">
+        <div><h2 class="card-title">Abonner mon agenda</h2><p class="mt-0.5 text-sm text-slate-500">Google Agenda, Outlook, Apple Calendrier…</p></div>
+        <%- icon('Rss', 'size-5 text-slate-400') %>
+      </div>
+      <div class="card-pad space-y-5">
+        <p class="text-sm text-slate-600">Ajoutez ce lien comme <strong>agenda par URL</strong> (dans Google Agenda : « Autres agendas » → « À partir de l'URL »). Les événements des associations s'afficheront et se mettront à jour automatiquement.</p>
+        <% [['Tous les événements', feedUrl], ['Uniquement mes associations', `${feedUrl}?mes=1`]].forEach(([label, url], i) => { %>
+          <div>
+            <label class="label" for="feed-<%= i %>"><%= label %></label>
+            <div class="flex gap-2">
+              <input id="feed-<%= i %>" class="input font-mono text-xs" readonly value="<%= url %>" data-select-on-focus>
+              <button type="button" class="btn btn-secondary" data-copy="#feed-<%= i %>"><%- icon('Copy') %><span>Copier</span></button>
+            </div>
+          </div>
+        <% }) %>
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-inset ring-amber-600/15">
+          <span class="flex items-center gap-2"><%- icon('Lock', 'size-4') %>Lien personnel : il donne accès aux événements réservés au réseau.</span>
+          <form method="post" action="/profil/agenda/regenerer" data-confirm="L'ancien lien cessera de fonctionner. Continuer ?">
+            <%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm"><%- icon('RotateCcw', 'size-3.5') %>Régénérer</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Mot de passe</h2><%- icon('KeyRound', 'size-5 text-slate-400') %></div>
+      <form method="post" action="/profil/mot-de-passe" class="card-pad space-y-5">
+        <%- include('../../partials/csrf') %>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <%- include('../../partials/field', { name: 'currentPassword', label: 'Mot de passe actuel', type: 'password', error: passwordError, required: true, attrs: 'autocomplete="current-password"' }) %>
+          <%- include('../../partials/field', { name: 'newPassword', label: 'Nouveau mot de passe', type: 'password', help: '8 caractères minimum.', required: true, attrs: 'autocomplete="new-password" minlength="8"' }) %>
+        </div>
+        <div class="flex justify-end"><button class="btn btn-secondary">Changer le mot de passe</button></div>
+      </form>
+    </section>
+  </div>
+
+  <section class="card h-fit overflow-hidden">
+    <div class="card-header"><h2 class="card-title">Mes associations</h2></div>
+    <div class="divide-list">
+      <% if (memberships.length) { memberships.forEach((m) => { %>
+        <a href="/associations/<%= m.slug %>" class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
+          <%- include('../../partials/avatar', { first: m.name, color: m.color, size: 'size-9 text-xs rounded-xl' }) %>
+          <span class="min-w-0 flex-1 truncate text-sm font-medium"><%= m.name %></span>
+          <% if (m.status === 'pending') { %><span class="badge badge-amber">En attente</span>
+          <% } else if (m.role === 'admin') { %><span class="badge badge-brand"><%- icon('Crown', 'size-3') %>Responsable</span>
+          <% } else { %><span class="badge badge-slate">Membre</span><% } %>
+        </a>
+      <% }) } else { %>
+        <%- include('../../partials/empty', { iconName: 'UsersRound', heading: 'Aucune association', actionHref: '/associations', actionLabel: 'Parcourir l’annuaire' }) %>
+      <% } %>
+    </div>
+  </section>
+</div>

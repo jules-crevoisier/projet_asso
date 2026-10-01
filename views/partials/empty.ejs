@@ -1,0 +1,6 @@
+<div class="flex flex-col items-center px-6 py-12 text-center">
+  <span class="mb-4 grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-400"><%- icon(locals.iconName || 'Inbox', 'size-6') %></span>
+  <p class="font-semibold text-slate-900"><%= locals.heading || 'Rien pour le moment' %></p>
+  <% if (locals.text) { %><p class="mt-1 max-w-sm text-sm text-slate-500"><%= text %></p><% } %>
+  <% if (locals.actionHref) { %><a href="<%= actionHref %>" class="btn btn-secondary mt-5"><%- icon('Plus') %><%= actionLabel %></a><% } %>
+</div>

@@ -1,0 +1,12 @@
+<%- include('_shell-start', { heading: 'Créer votre compte', sub: 'Un compte personnel par bénévole. Vous rejoindrez ensuite votre association.' }) %>
+  <form method="post" action="/inscription" class="space-y-5">
+    <%- include('../../partials/csrf') %>
+    <div class="grid grid-cols-2 gap-4">
+      <%- include('../../partials/field', { name: 'firstName', label: 'Prénom', value: values.firstName, error: errors.firstName, required: true, attrs: 'autocomplete="given-name" autofocus' }) %>
+      <%- include('../../partials/field', { name: 'lastName', label: 'Nom', value: values.lastName, error: errors.lastName, required: true, attrs: 'autocomplete="family-name"' }) %>
+    </div>
+    <%- include('../../partials/field', { name: 'email', label: 'Adresse e-mail', type: 'email', value: values.email, error: errors.email, required: true, attrs: 'autocomplete="email"' }) %>
+    <%- include('../../partials/field', { name: 'password', label: 'Mot de passe', type: 'password', error: errors.password, help: '8 caractères minimum.', required: true, attrs: 'autocomplete="new-password" minlength="8"' }) %>
+    <button class="btn btn-primary w-full py-2.5">Créer mon compte</button>
+  </form>
+<%- include('_shell-end', { footer: 'Déjà inscrit ? <a class="font-semibold text-brand-600 hover:text-brand-700" href="/connexion">Se connecter</a>' }) %>

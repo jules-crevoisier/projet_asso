@@ -1,0 +1,177 @@
+<div class="mb-6">
+  <a href="/evenements" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900"><%- icon('ChevronLeft') %>Calendrier</a>
+</div>
+
+<div class="card mb-6 overflow-hidden">
+  <div class="h-2" style="background-color: <%= event.association_color %>"></div>
+  <div class="flex flex-col gap-6 p-5 sm:p-8 lg:flex-row lg:items-start">
+    <div class="w-20 shrink-0 overflow-hidden rounded-2xl text-center ring-1 ring-slate-200">
+      <div class="py-1 text-xs font-semibold uppercase tracking-wide" style="background-color: <%= event.association_color %>; color: <%= contrast(event.association_color) %>"><%= fmt.monthShort(event.start_at) %></div>
+      <div class="py-2 text-3xl font-bold"><%= fmt.day(event.start_at) %></div>
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap gap-2">
+        <span class="badge badge-slate"><%= CATEGORIES[event.category] %></span>
+        <% if (event.visibility === 'network') { %><span class="badge badge-indigo"><%- icon('Lock', 'size-3') %>Réservé au réseau</span><% } else { %><span class="badge badge-emerald"><%- icon('Earth', 'size-3') %>Public</span><% } %>
+      </div>
+      <h1 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl"><%= event.title %></h1>
+      <div class="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+        <span class="flex items-start gap-2.5"><%- icon('Clock', 'size-4 mt-0.5 text-slate-400') %><span class="first-letter:uppercase"><%= fmt.range(event.start_at, event.end_at) %></span></span>
+        <span class="flex items-start gap-2.5"><%- icon('MapPin', 'size-4 mt-0.5 text-slate-400') %><%= event.location %></span>
+        <a href="/associations/<%= event.association_slug %>" class="flex items-center gap-2.5 hover:text-brand-700"><span class="size-4 grid place-items-center"><span class="size-2.5 rounded-full" style="background-color: <%= event.association_color %>"></span></span>Organisé par <span class="font-medium text-slate-900"><%= event.association_name %></span></a>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
+      <a href="/evenements/<%= event.id %>/evenement.ics" class="btn btn-secondary"><%- icon('CalendarPlus') %>Ajouter à mon agenda</a>
+      <% if (canEdit) { %>
+        <a href="/evenements/<%= event.id %>/modifier" class="btn btn-secondary"><%- icon('Pencil') %>Modifier</a>
+        <form method="post" action="/evenements/<%= event.id %>/supprimer" data-confirm="Supprimer définitivement cet événement ?">
+          <%- include('../../partials/csrf') %><button class="btn btn-danger w-full"><%- icon('Trash2') %>Supprimer</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<% if (conflicts.length) { %>
+  <div class="mb-6 flex gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-inset ring-amber-600/15 sm:p-5">
+    <%- icon('TriangleAlert', 'size-5 text-amber-500') %>
+    <div>
+      <p class="font-semibold">Sur le même créneau</p>
+      <ul class="mt-1 space-y-0.5">
+        <% conflicts.forEach((c) => { %><li><a class="font-medium underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600" href="/evenements/<%= c.id %>"><%= c.title %></a> — <%= c.association_name %>, <%= fmt.time(c.start_at) %>–<%= fmt.time(c.end_at) %>, <%= c.location %></li><% }) %>
+      </ul>
+    </div>
+  </div>
+<% } %>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card card-pad">
+      <h2 class="card-title mb-3">À propos</h2>
+      <div class="prose-text"><%= event.description %></div>
+    </section>
+
+    <% if (user) { %>
+      <section class="card overflow-hidden" id="discussion">
+        <div class="card-header"><h2 class="card-title">Discussion entre associations</h2><span class="text-sm text-slate-500"><%= comments.length %></span></div>
+        <div class="divide-list">
+          <% comments.forEach((c) => { %>
+            <div class="flex gap-3 px-5 py-4 sm:px-6">
+              <%- include('../../partials/avatar', { first: c.first_name, last: c.last_name, size: 'size-9 text-xs' }) %>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="font-semibold"><%= c.first_name %> <%= c.last_name %></span>
+                  <span class="text-slate-400"><%= fmt.ago(c.created_at) %></span>
+                  <% if (c.user_id === user.id || canEdit) { %>
+                    <form method="post" action="/evenements/commentaires/<%= c.id %>/supprimer" class="ml-auto" data-confirm="Supprimer ce message ?"><%- include('../../partials/csrf') %><button class="text-slate-300 hover:text-red-500" aria-label="Supprimer"><%- icon('Trash2', 'size-3.5') %></button></form>
+                  <% } %>
+                </div>
+                <p class="prose-text mt-1 text-sm"><%= c.body %></p>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+        <form method="post" action="/evenements/<%= event.id %>/commentaires" class="flex gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
+          <%- include('../../partials/csrf') %>
+          <%- include('../../partials/avatar', { first: user.first_name, last: user.last_name, size: 'size-9 text-xs' }) %>
+          <div class="flex-1">
+            <textarea name="body" rows="2" class="input" placeholder="Une question, une proposition d'aide…" required></textarea>
+            <div class="mt-2 flex justify-end"><button class="btn btn-primary btn-sm"><%- icon('Send', 'size-3.5') %>Envoyer</button></div>
+          </div>
+        </form>
+      </section>
+    <% } else { %>
+      <div class="card card-pad flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
+        <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><%- icon('MessageCircle', 'size-5') %></span>
+        <p class="flex-1 text-sm text-slate-600">Vous êtes une association ? Connectez-vous pour proposer votre aide, échanger avec les organisateurs ou vous inscrire comme bénévole.</p>
+        <a href="/connexion" class="btn btn-primary">Se connecter</a>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="space-y-6">
+    <section class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">Associations impliquées</h2></div>
+      <div class="divide-list">
+        <a href="/associations/<%= event.association_slug %>" class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
+          <%- include('../../partials/avatar', { first: event.association_name, color: event.association_color, size: 'size-9 text-xs rounded-xl' }) %>
+          <span class="min-w-0 flex-1 truncate text-sm font-medium"><%= event.association_name %></span>
+          <span class="badge badge-brand">Organisatrice</span>
+        </a>
+        <% participations.forEach((p) => { %>
+          <div class="px-5 py-3 sm:px-6">
+            <div class="flex items-center gap-3">
+              <%- include('../../partials/avatar', { first: p.name, color: p.color, size: 'size-9 text-xs rounded-xl' }) %>
+              <div class="min-w-0 flex-1">
+                <a href="/associations/<%= p.slug %>" class="block truncate text-sm font-medium hover:text-brand-700"><%= p.name %></a>
+                <span class="text-xs text-slate-500"><%= PARTICIPATION_KINDS[p.kind] %></span>
+              </div>
+              <% if (user && (canEdit || myAssociationIds.has(p.association_id))) { %>
+                <form method="post" action="/evenements/participations/<%= p.id %>/supprimer" data-confirm="Retirer cette association ?"><%- include('../../partials/csrf') %><button class="text-slate-300 hover:text-red-500" aria-label="Retirer"><%- icon('X') %></button></form>
+              <% } %>
+            </div>
+            <% if (p.message) { %><p class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">« <%= p.message %> »</p><% } %>
+          </div>
+        <% }) %>
+      </div>
+      <% if (availableAssociations.length) { %>
+        <div class="border-t border-slate-100 p-4 sm:px-6">
+          <button type="button" class="btn btn-secondary w-full" data-toggle="#participate-form"><%- icon('Handshake') %>Associer mon association</button>
+          <form id="participate-form" method="post" action="/evenements/<%= event.id %>/participer" class="mt-4 hidden space-y-4">
+            <%- include('../../partials/csrf') %>
+            <% if (availableAssociations.length > 1) { %>
+              <%- include('../../partials/field', { name: 'association_id', label: 'Au nom de', type: 'select', options: availableAssociations.map((a) => [a.id, a.name]) }) %>
+            <% } else { %>
+              <input type="hidden" name="association_id" value="<%= availableAssociations[0].id %>">
+              <p class="text-sm text-slate-600">Au nom de <strong><%= availableAssociations[0].name %></strong></p>
+            <% } %>
+            <%- include('../../partials/field', { name: 'kind', label: 'Votre rôle', type: 'select', options: Object.entries(PARTICIPATION_KINDS), value: 'participant' }) %>
+            <%- include('../../partials/field', { name: 'message', label: 'Message', placeholder: 'Ex. : on apporte 2 barnums', attrs: 'maxlength="300"' }) %>
+            <button class="btn btn-primary w-full">Confirmer</button>
+          </form>
+        </div>
+      <% } %>
+    </section>
+
+    <% if (event.volunteers_needed || event.material_needs) { %>
+      <section class="card card-pad">
+        <h2 class="card-title">Besoins</h2>
+        <% if (event.volunteers_needed) { const pct = Math.min(100, Math.round(event.nb_volunteers / event.volunteers_needed * 100)); %>
+          <div class="mt-4">
+            <div class="flex items-baseline justify-between text-sm">
+              <span class="flex items-center gap-2 font-medium"><%- icon('HandHeart', 'size-4 text-amber-500') %>Bénévoles</span>
+              <span class="text-slate-500"><strong class="text-slate-900"><%= event.nb_volunteers %></strong> / <%= event.volunteers_needed %></span>
+            </div>
+            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500" style="width: <%= pct %>%"></div></div>
+            <% if (user) { %>
+              <form method="post" action="/evenements/<%= event.id %>/benevole" class="mt-4">
+                <%- include('../../partials/csrf') %>
+                <% if (isVolunteer) { %><button class="btn btn-secondary w-full"><%- icon('Check') %>Inscrit·e — se désinscrire</button>
+                <% } else { %><button class="btn btn-primary w-full"><%- icon('HandHeart') %>Je me propose</button><% } %>
+              </form>
+            <% } %>
+            <% if (volunteers.length) { %>
+              <ul class="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                <% volunteers.forEach((v) => { %>
+                  <li class="flex items-center gap-2.5 text-sm">
+                    <%- include('../../partials/avatar', { first: v.first_name, last: v.last_name, size: 'size-7 text-[10px]' }) %>
+                    <span class="min-w-0 flex-1 truncate"><%= v.first_name %> <%= v.last_name %></span>
+                    <a href="mailto:<%= v.email %>" class="text-slate-400 hover:text-brand-600" title="<%= v.email %>"><%- icon('Mail', 'size-4') %></a>
+                    <% if (v.phone) { %><a href="tel:<%= v.phone %>" class="text-slate-400 hover:text-brand-600" title="<%= v.phone %>"><%- icon('Phone', 'size-4') %></a><% } %>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        <% } %>
+        <% if (event.material_needs) { %>
+          <div class="mt-5 border-t border-slate-100 pt-4">
+            <p class="flex items-center gap-2 text-sm font-medium"><%- icon('PackageSearch', 'size-4 text-orange-500') %>Matériel recherché</p>
+            <p class="prose-text mt-2 text-sm"><%= event.material_needs %></p>
+          </div>
+        <% } %>
+      </section>
+    <% } %>
+  </div>
+</div>

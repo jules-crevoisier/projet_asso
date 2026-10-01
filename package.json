@@ -1,0 +1,39 @@
+{
+  "name": "assos-troyes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plateforme de coordination des associations de Troyes : calendrier partagé, événements, annonces.",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i ./styles/app.css -o ./public/css/app.css --minify",
+    "watch:css": "tailwindcss -i ./styles/app.css -o ./public/css/app.css --watch",
+    "build": "npm run build:css",
+    "start": "node server.js",
+    "dev": "npm run build:css && node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "node --test --test-concurrency=1",
+    "postinstall": "npm run build:css"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@tailwindcss/cli": "^4.3.3",
+    "better-sqlite3": "^13.0.3",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "express-session": "^1.19.0",
+    "fullcalendar": "^6.1.21",
+    "helmet": "^8.3.0",
+    "lucide-static": "^1.49.0",
+    "nodemailer": "^10.0.13",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.0"
+  }
+}

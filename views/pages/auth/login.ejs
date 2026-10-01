@@ -1,0 +1,17 @@
+<%- include('_shell-start', { heading: 'Bon retour parmi nous', sub: 'Connectez-vous à votre espace associations.' }) %>
+  <% if (error) { %>
+    <div class="mb-5 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-inset ring-red-600/10"><%- icon('CircleX', 'size-4') %><%= error %></div>
+  <% } %>
+  <form method="post" action="/connexion" class="space-y-5">
+    <%- include('../../partials/csrf') %>
+    <%- include('../../partials/field', { name: 'email', label: 'Adresse e-mail', type: 'email', value: email, required: true, attrs: 'autocomplete="email" autofocus' }) %>
+    <div>
+      <div class="mb-1.5 flex items-center justify-between">
+        <label for="f-password" class="text-sm font-medium text-slate-700">Mot de passe</label>
+        <a href="/mot-de-passe-oublie" class="text-sm font-medium text-brand-600 hover:text-brand-700">Oublié ?</a>
+      </div>
+      <input id="f-password" name="password" type="password" class="input" required autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary w-full py-2.5">Se connecter</button>
+  </form>
+<%- include('_shell-end', { footer: 'Pas encore de compte ? <a class="font-semibold text-brand-600 hover:text-brand-700" href="/inscription">Créer un compte</a>' }) %>
