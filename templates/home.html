@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Accueil{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Les associations de {{ PLATFORM_CITY }} se coordonnent ici.</h1>
+  <p class="lead">Un calendrier partagé pour éviter que deux événements tombent le même jour, des annonces pour se prêter du matériel ou trouver des bénévoles, et un annuaire pour se connaître.</p>
+  <div class="btn-row">
+    <a class="btn" href="{% url 'accounts:signup' %}">Inscrire mon association</a>
+    <a class="btn btn-secondary" href="{% url 'events:calendar' %}">Voir le calendrier</a>
+  </div>
+  <div class="stats">
+    <div><strong>{{ nb_associations }}</strong><span class="muted">associations</span></div>
+    <div><strong>{{ nb_events }}</strong><span class="muted">événements à venir</span></div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="card feature"><div class="icon">📅</div><h3>Calendrier partagé</h3><p class="muted">Tous les événements au même endroit, avec une alerte quand un créneau est déjà pris. Abonnez-vous depuis Google Agenda ou votre téléphone.</p></div>
+  <div class="card feature"><div class="icon">🤝</div><h3>Co-organisation</h3><p class="muted">Rejoignez l'événement d'une autre association : co-organiser, tenir un stand, prêter du matériel.</p></div>
+  <div class="card feature"><div class="icon">📣</div><h3>Annonces</h3><p class="muted">Recherche de bénévoles, prêt de matériel, salle disponible, appel à partenariat.</p></div>
+  <div class="card feature"><div class="icon">👥</div><h3>Comptes & équipes</h3><p class="muted">Chaque membre a son compte ; les responsables gèrent qui publie au nom de l'association.</p></div>
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Prochains événements publics</h2><a href="{% url 'events:list' %}">Tout voir</a></div>
+  <ul class="list">
+    {% for event in events %}<li>{% include "includes/event_item.html" %}</li>{% empty %}<li class="empty">Aucun événement public à venir pour l'instant.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

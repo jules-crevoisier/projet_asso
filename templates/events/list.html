@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Événements{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% if past %}Événements passés{% else %}Événements à venir{% endif %}</h1>
+  <div class="btn-row">
+    <a class="btn btn-ghost btn-sm" href="{% url 'events:calendar' %}?{{ filter_query }}">Vue calendrier</a>
+    {% if past %}<a class="btn btn-ghost btn-sm" href="?{{ filter_query }}">À venir</a>{% else %}<a class="btn btn-ghost btn-sm" href="?passes=1&{{ filter_query }}">Passés</a>{% endif %}
+    {% if user.is_authenticated %}<a class="btn" href="{% url 'events:create' %}">+ Événement</a>{% endif %}
+  </div>
+</div>
+{% include "includes/event_filters.html" %}
+<div class="card">
+  <ul class="list">
+    {% for event in events %}<li>{% include "includes/event_item.html" %}</li>{% empty %}<li class="empty">Aucun événement.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<div class="event-item">
+  <div class="date-badge"><span class="d">{{ event.start|date:"j" }}</span><span class="m">{{ event.start|date:"M" }}</span></div>
+  <div>
+    <a class="title" href="{{ event.get_absolute_url }}">{{ event.title }}</a>
+    {% if event.visibility == "network" %}<span class="badge badge-accent">Réseau</span>{% endif %}
+    {% if event.volunteers_needed %}<span class="badge badge-warning">Cherche bénévoles</span>{% endif %}
+    <div class="meta">
+      <span>{{ event.start|date:"l j F, H:i" }}</span>
+      <span>{{ event.location }}</span>
+      <span>{{ event.association }}</span>
+    </div>
+  </div>
+</div>
