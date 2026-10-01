@@ -1,108 +1,99 @@
-<div class="card mb-6 overflow-hidden">
-  <div class="relative h-32 sm:h-40" style="background: linear-gradient(120deg, <%= association.color %>, <%= association.color %>bb 60%, <%= association.color %>66)">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.25),transparent_50%)]"></div>
-  </div>
-  <div class="relative px-5 pb-6 sm:px-8">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div class="flex items-end gap-4">
-        <span class="-mt-10 shrink-0 rounded-3xl bg-white p-1.5 shadow-md"><%- include('../../partials/avatar', { first: association.name, color: association.color, size: 'size-20 text-2xl rounded-2xl' }) %></span>
-        <div class="min-w-0 pb-1 pt-3">
-          <h1 class="text-2xl font-bold tracking-tight"><%= association.name %></h1>
-          <div class="mt-1.5 flex flex-wrap gap-2">
-            <span class="badge badge-slate"><%= CATEGORIES[association.category] %></span>
-            <% if (association.is_validated) { %><span class="badge badge-emerald"><%- icon('BadgeCheck', 'size-3') %>Validée</span><% } else { %><span class="badge badge-amber"><%- icon('Hourglass', 'size-3') %>En attente de validation</span><% } %>
-          </div>
-        </div>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <% if (user && user.is_staff && !association.is_validated) { %>
-          <form method="post" action="/associations/<%= association.slug %>/valider"><%- include('../../partials/csrf') %><button class="btn btn-primary"><%- icon('BadgeCheck') %>Valider</button></form>
-        <% } %>
-        <% if (isAdmin) { %>
-          <a href="/associations/<%= association.slug %>/membres" class="btn btn-secondary"><%- icon('Users') %>Membres</a>
-          <a href="/associations/<%= association.slug %>/modifier" class="btn btn-secondary"><%- icon('Pencil') %>Modifier</a>
-        <% } %>
-        <% if (!user) { %>
-          <a href="/connexion" class="btn btn-primary"><%- icon('UserPlus') %>Rejoindre</a>
-        <% } else if (!membership) { %>
-          <button type="button" class="btn btn-primary" data-toggle="#join-form"><%- icon('UserPlus') %>Rejoindre</button>
-        <% } else if (membership.status === 'pending') { %>
-          <span class="btn btn-secondary pointer-events-none"><%- icon('Hourglass') %>Demande envoyée</span>
-        <% } else { %>
-          <span class="btn btn-secondary pointer-events-none text-emerald-700"><%- icon('CircleCheck') %><%= membership.role === 'admin' ? 'Responsable' : 'Membre' %></span>
-        <% } %>
-      </div>
+<div class="mb-10 border-b border-line pb-8">
+  <p class="kicker mb-3 flex items-center gap-2"><span class="swatch size-3" style="background-color: <%= association.color %>"></span><%= CATEGORIES[association.category] %><% if (!association.is_validated) { %> · <span class="text-warn">En attente de validation</span><% } %></p>
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <div class="max-w-3xl">
+      <h1 class="h-page"><%= association.name %></h1>
+      <p class="lead mt-3"><%= association.short_description %></p>
     </div>
-
-    <% if (user && !membership) { %>
-      <form id="join-form" method="post" action="/associations/<%= association.slug %>/rejoindre" class="mt-6 hidden rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5">
-        <%- include('../../partials/csrf') %>
-        <%- include('../../partials/field', { name: 'message', label: 'Un mot pour les responsables (facultatif)', placeholder: 'Ex. : je suis bénévole depuis 2023 sur la buvette', attrs: 'maxlength="300"' }) %>
-        <div class="mt-3 flex justify-end"><button class="btn btn-primary">Envoyer ma demande</button></div>
-      </form>
-    <% } %>
+    <div class="flex shrink-0 flex-wrap gap-2">
+      <% if (user && user.is_staff && !association.is_validated) { %>
+        <form method="post" action="/associations/<%= association.slug %>/valider"><%- include('../../partials/csrf') %><button class="btn btn-primary">Valider l'association</button></form>
+      <% } %>
+      <% if (!user) { %>
+        <a href="/connexion" class="btn btn-primary">Se connecter pour rejoindre</a>
+      <% } else if (!membership) { %>
+        <button type="button" class="btn btn-primary" data-toggle="#join-form" aria-controls="join-form" aria-expanded="false">Demander à rejoindre</button>
+      <% } else if (membership.status === 'pending') { %>
+        <p class="tag tag-warn px-2.5 py-1.5 text-[14px]">Demande envoyée, en attente</p>
+      <% } %>
+      <% if (isAdmin) { %>
+        <a href="/associations/<%= association.slug %>/membres" class="btn btn-secondary">Gérer les membres</a>
+        <a href="/associations/<%= association.slug %>/modifier" class="btn btn-secondary">Modifier la fiche</a>
+      <% } %>
+    </div>
   </div>
+
+  <% if (user && !membership) { %>
+    <form id="join-form" method="post" action="/associations/<%= association.slug %>/rejoindre" class="mt-6 hidden max-w-xl space-y-4 border-l-4 border-ink bg-surface p-5">
+      <%- include('../../partials/csrf') %>
+      <%- include('../../partials/field', { name: 'message', label: 'Un mot pour les responsables', optional: true, help: 'Par exemple : « je tiens la buvette depuis 2023 ».', attrs: 'maxlength="300"' }) %>
+      <button class="btn btn-primary">Envoyer ma demande</button>
+    </form>
+  <% } %>
 </div>
 
-<div class="grid gap-6 lg:grid-cols-3">
-  <div class="space-y-6 lg:col-span-2">
-    <section class="card card-pad">
-      <p class="text-lg font-medium leading-snug text-slate-900"><%= association.short_description %></p>
-      <% if (association.description) { %><div class="prose-text mt-4"><%= association.description %></div><% } %>
-    </section>
+<div class="grid gap-x-16 gap-y-12 lg:grid-cols-[2fr_1fr]">
+  <div class="space-y-12">
+    <% if (association.description) { %>
+      <section aria-labelledby="presentation">
+        <h2 id="presentation" class="h-section mb-4">Présentation</h2>
+        <div class="prose-text"><%= association.description %></div>
+      </section>
+    <% } %>
 
-    <section class="card overflow-hidden">
-      <div class="card-header"><h2 class="card-title">Événements à venir</h2><a class="card-link" href="/evenements?association=<%= association.slug %>">Voir au calendrier <%- icon('ArrowRight', 'size-3.5') %></a></div>
-      <div class="divide-list">
-        <% if (events.length) { events.forEach((event) => { %>
-          <%- include('../../partials/event-row', { event }) %>
-        <% }) } else { %>
-          <%- include('../../partials/empty', { iconName: 'CalendarDays', heading: 'Aucun événement à venir' }) %>
-        <% } %>
+    <section aria-labelledby="evenements">
+      <div class="mb-4 flex items-baseline justify-between gap-4 border-b border-ink pb-2">
+        <h2 id="evenements" class="h-section">Prochains événements</h2>
+        <a class="link shrink-0 whitespace-nowrap text-[15px]" href="/evenements?association=<%= association.slug %>">Dans l'agenda</a>
       </div>
+      <% if (events.length) { %>
+        <%- include('../../partials/agenda', { events, showCount: false }) %>
+      <% } else { %>
+        <p class="py-4 text-ink-2">Aucun événement annoncé pour l'instant.</p>
+      <% } %>
     </section>
 
     <% if (posts.length) { %>
-      <section class="card overflow-hidden">
-        <div class="card-header"><h2 class="card-title">Annonces en cours</h2></div>
-        <div class="divide-list"><% posts.forEach((post) => { %><%- include('../../partials/post-row', { post }) %><% }) %></div>
+      <section aria-labelledby="annonces">
+        <h2 id="annonces" class="h-section mb-1 border-b border-ink pb-2">Annonces en cours</h2>
+        <div class="rows -mx-5"><% posts.forEach((post) => { %><%- include('../../partials/post-row', { post }) %><% }) %></div>
       </section>
     <% } %>
   </div>
 
-  <div class="space-y-6">
-    <section class="card card-pad">
-      <h2 class="card-title mb-4">Contact</h2>
-      <ul class="space-y-3 text-sm">
-        <% if (association.email) { %><li class="flex items-center gap-3"><%- icon('Mail', 'size-4 text-slate-400') %><a class="truncate text-brand-700 hover:underline" href="mailto:<%= association.email %>"><%= association.email %></a></li><% } %>
-        <% if (association.phone) { %><li class="flex items-center gap-3"><%- icon('Phone', 'size-4 text-slate-400') %><%= association.phone %></li><% } %>
-        <% if (association.website) { %><li class="flex items-center gap-3"><%- icon('Globe', 'size-4 text-slate-400') %><a class="truncate text-brand-700 hover:underline" href="<%= association.website %>" target="_blank" rel="noopener"><%= association.website.replace(/^https?:\/\//, '') %></a></li><% } %>
-        <% if (association.address) { %><li class="flex items-center gap-3"><%- icon('MapPin', 'size-4 text-slate-400') %><%= association.address %></li><% } %>
-        <% if (!association.email && !association.phone && !association.website && !association.address) { %><li class="text-slate-500">Pas de coordonnées renseignées.</li><% } %>
-      </ul>
+  <aside class="space-y-10">
+    <section>
+      <h2 class="h-block mb-3 border-b border-ink pb-2">Contact</h2>
+      <dl class="space-y-3">
+        <% if (association.email) { %><div><dt class="meta">E-mail</dt><dd><a class="link break-all" href="mailto:<%= association.email %>"><%= association.email %></a></dd></div><% } %>
+        <% if (association.phone) { %><div><dt class="meta">Téléphone</dt><dd><a class="link-quiet tnum" href="tel:<%= association.phone.replace(/\s/g, '') %>"><%= association.phone %></a></dd></div><% } %>
+        <% if (association.website) { %><div><dt class="meta">Site</dt><dd><a class="link break-all" href="<%= association.website %>" target="_blank" rel="noopener"><%= association.website.replace(/^https?:\/\//, '').replace(/\/$/, '') %></a></dd></div><% } %>
+        <% if (association.address) { %><div><dt class="meta">Adresse</dt><dd><%= association.address %></dd></div><% } %>
+        <% if (!association.email && !association.phone && !association.website && !association.address) { %><p class="text-ink-2">Pas de coordonnées renseignées.</p><% } %>
+      </dl>
     </section>
 
-    <section class="card overflow-hidden">
-      <div class="card-header"><h2 class="card-title">Membres</h2><% if (user) { %><span class="text-sm text-slate-500"><%= members.length %></span><% } %></div>
+    <section>
+      <h2 class="h-block mb-3 flex items-baseline justify-between border-b border-ink pb-2">Membres<% if (user) { %><span class="font-sans text-[14px] font-normal text-ink-3"><%= members.length %></span><% } %></h2>
       <% if (user) { %>
-        <div class="divide-list">
+        <ul class="space-y-2">
           <% members.forEach((m) => { %>
-            <div class="flex items-center gap-3 px-5 py-2.5 sm:px-6">
+            <li class="flex items-center gap-3">
               <%- include('../../partials/avatar', { first: m.first_name, last: m.last_name }) %>
-              <span class="flex-1 text-sm font-medium"><%= m.first_name %> <%= m.last_name %></span>
-              <% if (m.role === 'admin') { %><span class="badge badge-brand"><%- icon('Crown', 'size-3') %>Responsable</span><% } %>
-            </div>
+              <span class="flex-1"><%= m.first_name %> <%= m.last_name %></span>
+              <% if (m.role === 'admin') { %><span class="text-[13px] text-ink-3">Responsable</span><% } %>
+            </li>
           <% }) %>
-        </div>
+        </ul>
         <% if (membership) { %>
-          <form method="post" action="/associations/<%= association.slug %>/quitter" class="border-t border-slate-100 px-5 py-3 sm:px-6" data-confirm="<%= membership.status === 'pending' ? 'Annuler votre demande ?' : 'Quitter cette association ?' %>">
+          <form method="post" action="/associations/<%= association.slug %>/quitter" class="mt-5" data-confirm="<%= membership.status === 'pending' ? 'Annuler votre demande ?' : 'Quitter cette association ?' %>">
             <%- include('../../partials/csrf') %>
-            <button class="text-sm font-medium text-slate-500 hover:text-red-600"><%= membership.status === 'pending' ? 'Annuler ma demande' : 'Quitter l’association' %></button>
+            <button class="link-quiet text-[15px] text-ink-2"><%= membership.status === 'pending' ? 'Annuler ma demande' : 'Quitter l’association' %></button>
           </form>
         <% } %>
       <% } else { %>
-        <p class="px-5 py-4 text-sm text-slate-500 sm:px-6"><a class="font-medium text-brand-700 hover:underline" href="/connexion">Connectez-vous</a> pour voir les membres.</p>
+        <p class="text-ink-2"><a class="link" href="/connexion">Connectez-vous</a> pour voir les membres.</p>
       <% } %>
     </section>
-  </div>
+  </aside>
 </div>

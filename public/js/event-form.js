@@ -29,16 +29,16 @@
         const res = await fetch(`/api/conflits?${qs}`, { headers: { Accept: 'application/json' } });
         const conflicts = await res.json();
         if (!conflicts.length) {
-          box.className = 'flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-600/15';
-          box.innerHTML = '✓ Aucun autre événement sur ce créneau.';
+          box.className = 'notice notice-success';
+          box.innerHTML = '<p>Aucun autre événement sur ce créneau.</p>';
           return;
         }
-        box.className = 'rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-inset ring-amber-600/20';
-        box.innerHTML = `<p class="font-semibold">⚠ ${conflicts.length} autre${conflicts.length > 1 ? 's' : ''} événement${conflicts.length > 1 ? 's' : ''} sur ce créneau</p>
-          <ul class="mt-1.5 space-y-1">${conflicts.map((c) => `
-            <li class="flex items-center gap-2"><span class="size-2 shrink-0 rounded-full" style="background:${escapeHtml(c.color)}"></span>
-            <span><a class="font-medium underline decoration-amber-300 underline-offset-2" target="_blank" href="/evenements/${c.id}">${escapeHtml(c.title)}</a> — ${escapeHtml(c.association)}, ${escapeHtml(fmt.format(new Date(c.start)))}, ${escapeHtml(c.location)}</span></li>`).join('')}
-          </ul>`;
+        box.className = 'notice notice-warn flex-col gap-1';
+        box.innerHTML = `<p class="font-bold">${conflicts.length} autre${conflicts.length > 1 ? 's' : ''} événement${conflicts.length > 1 ? 's' : ''} sur ce créneau</p>
+          <ul class="space-y-1">${conflicts.map((c) => `
+            <li><span class="swatch mr-1.5" style="background:${escapeHtml(c.color)}"></span><a class="link-quiet font-semibold" target="_blank" href="/evenements/${c.id}">${escapeHtml(c.title)}</a>, ${escapeHtml(c.association)}, <span class="tnum">${escapeHtml(fmt.format(new Date(c.start)))}</span>, ${escapeHtml(c.location)}</li>`).join('')}
+          </ul>
+          <p class="text-[15px]">Vous pourrez quand même publier si vos publics ne se recoupent pas.</p>`;
       } catch {
         box.classList.add('hidden');
       }

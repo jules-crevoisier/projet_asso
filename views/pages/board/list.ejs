@@ -1,34 +1,35 @@
 <%- include('../../partials/page-header', {
   heading: 'Annonces',
-  subtitle: 'Bénévoles, matériel, salles, partenariats : l’entraide entre associations.',
-  actions: `<a href="/annonces/nouvelle" class="btn btn-primary">${icon('Plus')}Nouvelle annonce</a>`,
+  subtitle: 'Bénévoles, matériel, salles, partenariats : ce que les associations demandent et proposent.',
+  actions: `<a href="/annonces/nouvelle" class="btn btn-primary">Publier une annonce</a>`,
 }) %>
 
-<div class="grid gap-6 lg:grid-cols-[220px_1fr]">
-  <aside class="space-y-1">
-    <a href="/annonces<%= query({ q, cloturees: closed ? '1' : '' }, {}) %>" class="nav-link <%= !kind ? 'active' : '' %>"><%- icon('Inbox', 'size-[18px] text-slate-400') %>Toutes</a>
-    <% Object.entries(POST_KINDS).forEach(([v, k]) => { %>
-      <a href="/annonces<%= query({ q, cloturees: closed ? '1' : '' }, { type: v }) %>" class="nav-link <%= kind === v ? 'active' : '' %>"><%- icon(k.icon, 'size-[18px] text-slate-400') %><%= k.label %></a>
-    <% }) %>
+<div class="grid gap-x-16 gap-y-8 lg:grid-cols-[14rem_1fr]">
+  <aside>
+    <form method="get" role="search" class="mb-6">
+      <label for="q" class="label">Rechercher</label>
+      <div class="flex gap-2">
+        <input id="q" type="search" name="q" value="<%= q %>" class="input">
+        <% if (kind) { %><input type="hidden" name="type" value="<%= kind %>"><% } %>
+        <% if (closed) { %><input type="hidden" name="cloturees" value="1"><% } %>
+        <button class="btn btn-secondary btn-icon" aria-label="Lancer la recherche"><%- icon('Search') %></button>
+      </div>
+    </form>
+    <p class="kicker mb-2">Type</p>
+    <nav class="-mx-3 flex gap-1 overflow-x-auto lg:flex-col" aria-label="Filtrer par type">
+      <a href="/annonces<%= query({ q, cloturees: closed ? '1' : '' }, {}) %>" class="side-link shrink-0 <%= !kind ? 'active' : '' %>">Toutes</a>
+      <% Object.entries(POST_KINDS).forEach(([v, label]) => { %>
+        <a href="/annonces<%= query({ q, cloturees: closed ? '1' : '' }, { type: v }) %>" class="side-link shrink-0 <%= kind === v ? 'active' : '' %>" <%= kind === v ? 'aria-current=page' : '' %>><%= label %></a>
+      <% }) %>
+    </nav>
+    <p class="mt-6"><a class="link shrink-0 whitespace-nowrap text-[15px]" href="/annonces<%= query({ q, type: kind }, { cloturees: closed ? '' : '1' }) %>"><%= closed ? 'Masquer les annonces résolues' : 'Afficher aussi les annonces résolues' %></a></p>
   </aside>
 
   <div>
-    <form method="get" class="mb-4 flex flex-wrap items-center gap-3" data-autosubmit>
-      <% if (kind) { %><input type="hidden" name="type" value="<%= kind %>"><% } %>
-      <div class="relative min-w-0 flex-1">
-        <span class="pointer-events-none absolute inset-y-0 left-3 grid place-items-center text-slate-400"><%- icon('Search') %></span>
-        <input type="search" name="q" value="<%= q %>" placeholder="Rechercher une annonce…" class="input pl-9" aria-label="Rechercher">
-      </div>
-      <label class="chip cursor-pointer has-[:checked]:bg-slate-900 has-[:checked]:text-white has-[:checked]:ring-slate-900">
-        <input type="checkbox" name="cloturees" value="1" class="sr-only" <%= closed ? 'checked' : '' %>><%- icon('Archive', 'size-3.5') %>Inclure les résolues
-      </label>
-    </form>
-    <div class="card overflow-hidden">
-      <div class="divide-list">
-        <% if (posts.length) { posts.forEach((post) => { %><%- include('../../partials/post-row', { post, excerpt: true }) %><% }) } else { %>
-          <%- include('../../partials/empty', { iconName: 'Megaphone', heading: 'Aucune annonce', text: 'Soyez la première association à demander ou proposer un coup de main.', actionHref: '/annonces/nouvelle', actionLabel: 'Publier une annonce' }) %>
-        <% } %>
-      </div>
-    </div>
+    <% if (posts.length) { %>
+      <div class="rows -mx-5 border-y border-line"><% posts.forEach((post) => { %><%- include('../../partials/post-row', { post, excerpt: true }) %><% }) %></div>
+    <% } else { %>
+      <div class="panel"><%- include('../../partials/empty', { heading: 'Aucune annonce', text: q || kind ? 'Rien ne correspond à ces critères.' : 'Besoin de bras, d’une sono ou d’une salle ? Demandez aux autres associations.', actionHref: '/annonces/nouvelle', actionLabel: 'Publier une annonce' }) %></div>
+    <% } %>
   </div>
 </div>

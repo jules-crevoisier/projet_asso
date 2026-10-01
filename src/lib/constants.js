@@ -18,19 +18,37 @@ const PARTICIPATION_KINDS = {
 };
 
 const POST_KINDS = {
-  info: { label: 'Information', tone: 'slate', icon: 'Info' },
-  volunteers: { label: 'Recherche de bénévoles', tone: 'amber', icon: 'HandHeart' },
-  lend: { label: 'Prêt / don de matériel', tone: 'emerald', icon: 'PackageOpen' },
-  borrow: { label: 'Recherche de matériel', tone: 'orange', icon: 'PackageSearch' },
-  partnership: { label: 'Appel à partenariat', tone: 'indigo', icon: 'Handshake' },
-  space: { label: 'Salle / local', tone: 'sky', icon: 'DoorOpen' },
-  other: { label: 'Autre', tone: 'slate', icon: 'MessageSquare' },
+  volunteers: 'Recherche de bénévoles',
+  lend: 'Prêt ou don de matériel',
+  borrow: 'Recherche de matériel',
+  space: 'Salle ou local',
+  partnership: 'Appel à partenariat',
+  info: 'Information',
+  other: 'Autre',
 };
 
-// Couleurs proposées pour identifier chaque association dans le calendrier
+// Couleurs des associations : teintes terreuses, toutes lisibles avec du texte blanc (≥ 4,5:1).
+// Voir docs/design.md.
 const COLORS = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', '#f59e0b',
-  '#84cc16', '#10b981', '#14b8a6', '#06b6d4', '#3b82f6', '#64748b',
+  '#b4532a', // brique
+  '#94691c', // ocre
+  '#557548', // sauge
+  '#2f6b4f', // forêt
+  '#2b6f77', // canard
+  '#4a6a8c', // ardoise
+  '#34478a', // outremer
+  '#7a4a7a', // prune
+  '#a8445e', // framboise
+  '#7b5b3e', // terre
+  '#66682c', // olive
+  '#5f5f5a', // gris
 ];
 
-module.exports = { CATEGORIES, PARTICIPATION_KINDS, POST_KINDS, COLORS };
+// Anciennes couleurs (première version) → nouvelles, pour migrer les bases existantes
+const LEGACY_COLORS = {
+  '#6366f1': '#34478a', '#8b5cf6': '#7a4a7a', '#ec4899': '#a8445e', '#ef4444': '#b4532a',
+  '#f97316': '#b4532a', '#f59e0b': '#94691c', '#84cc16': '#66682c', '#10b981': '#2f6b4f',
+  '#14b8a6': '#2b6f77', '#06b6d4': '#2b6f77', '#3b82f6': '#4a6a8c', '#64748b': '#5f5f5a',
+};
+
+module.exports = { CATEGORIES, PARTICIPATION_KINDS, POST_KINDS, COLORS, LEGACY_COLORS };

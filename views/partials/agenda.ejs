@@ -1,0 +1,28 @@
+<%
+  // Agenda groupé par jour. Paramètres : events, compact (bool), showCount (bool, défaut true)
+  const days = groupByDay(events);
+  const showCount = locals.showCount !== false;
+%>
+<div class="<%= locals.compact ? '' : 'space-y-8' %>">
+  <% days.forEach((day) => { %>
+    <section aria-labelledby="jour-<%= day.key %>" class="<%= locals.compact ? 'border-t border-line first:border-t-0' : '' %>">
+      <h3 id="jour-<%= day.key %>" class="flex items-baseline gap-3 <%= locals.compact ? 'px-5 pb-1 pt-4' : 'border-b border-ink pb-2' %>">
+        <span class="font-serif <%= locals.compact ? 'text-[17px]' : 'text-[20px]' %> font-semibold"><%= fmt.dayHeading(day.date) %></span>
+        <% if (showCount && day.events.length > 1) { %><span class="text-[13px] font-bold text-accent"><%= day.events.length %> événements ce jour</span><% } %>
+      </h3>
+      <ol class="<%= locals.compact ? '' : 'rows' %>">
+        <% day.events.forEach((event) => { %>
+          <li class="group relative grid grid-cols-[4.25rem_1fr] gap-x-4 <%= locals.compact ? 'px-5 py-2.5' : 'py-3.5' %> sm:grid-cols-[5.5rem_1fr]">
+            <span class="tnum pt-0.5 text-[15px] text-ink-2"><%= fmt.time(event.start_at) %><span class="hidden text-ink-3 sm:inline">–<%= fmt.time(event.end_at) %></span></span>
+            <div class="min-w-0 border-l-[3px] pl-3" style="border-color: <%= event.association_color %>">
+              <a href="/evenements/<%= event.id %>" class="font-bold leading-snug text-ink after:absolute after:inset-0 group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[3px]"><%= event.title %></a>
+              <% if (event.visibility === 'network') { %><span class="tag ml-1 align-[1px]">Réseau</span><% } %>
+              <p class="mt-0.5 text-[14px] text-ink-2"><%= event.association_name %> · <%= event.location %></p>
+              <% if (event.volunteers_needed > event.nb_volunteers) { %><p class="mt-1 text-[14px] font-semibold text-warn">Cherche <%= event.volunteers_needed - event.nb_volunteers %> bénévole<%= event.volunteers_needed - event.nb_volunteers > 1 ? 's' : '' %></p><% } %>
+            </div>
+          </li>
+        <% }) %>
+      </ol>
+    </section>
+  <% }) %>
+</div>

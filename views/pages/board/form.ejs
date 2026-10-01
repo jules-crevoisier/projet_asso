@@ -1,32 +1,24 @@
-<%- include('../../partials/page-header', { heading: title, subtitle: post ? `Pour ${post.association_name}` : 'Visible par toutes les associations connectées.' }) %>
+<%- include('../../partials/page-header', { heading: title, subtitle: post ? `Pour ${post.association_name}.` : 'Visible par toutes les personnes connectées.' }) %>
 
-<form method="post" class="max-w-3xl space-y-6">
+<form method="post" class="max-w-2xl space-y-10" novalidate>
   <%- include('../../partials/csrf') %>
-  <section class="card card-pad space-y-6">
-    <fieldset>
-      <legend class="label">Type d'annonce</legend>
-      <div class="grid gap-2 sm:grid-cols-2">
-        <% Object.entries(POST_KINDS).forEach(([v, k]) => { %>
-          <label class="flex cursor-pointer items-center gap-3 rounded-xl p-3 ring-1 ring-inset ring-slate-200 transition has-[:checked]:bg-brand-50/60 has-[:checked]:ring-2 has-[:checked]:ring-brand-600">
-            <input type="radio" name="kind" value="<%= v %>" class="sr-only" <%= values.kind === v ? 'checked' : '' %>>
-            <span class="grid size-8 place-items-center rounded-lg badge-<%= k.tone %> ring-1 ring-inset"><%- icon(k.icon, 'size-4') %></span>
-            <span class="text-sm font-medium"><%= k.label %></span>
-          </label>
-        <% }) %>
-      </div>
-    </fieldset>
-    <% if (!post) { %>
-      <% if (associations.length > 1) { %>
-        <%- include('../../partials/field', { name: 'association_id', label: 'Au nom de', type: 'select', value: values.association_id, error: errors.association_id, options: associations.map((a) => [a.id, a.name]) }) %>
-      <% } else { %>
-        <input type="hidden" name="association_id" value="<%= associations[0].id %>">
-      <% } %>
-    <% } %>
-    <%- include('../../partials/field', { name: 'title', label: 'Titre', value: values.title, error: errors.title, required: true, placeholder: 'Ex. : Recherche 10 bénévoles pour la collecte du 15 novembre', attrs: 'maxlength="200"' }) %>
-    <%- include('../../partials/field', { name: 'body', label: 'Détails', type: 'textarea', rows: 8, value: values.body, error: errors.body, required: true, placeholder: 'Quoi, quand, où, comment vous contacter…' }) %>
-  </section>
-  <div class="flex justify-end gap-2">
-    <a href="<%= post ? `/annonces/${post.id}` : '/annonces' %>" class="btn btn-ghost">Annuler</a>
-    <button class="btn btn-primary"><%= post ? 'Enregistrer' : 'Publier l’annonce' %></button>
+  <fieldset>
+    <legend class="label">Type d'annonce</legend>
+    <div class="grid gap-2 sm:grid-cols-2">
+      <% Object.entries(POST_KINDS).forEach(([v, label]) => { %>
+        <label class="choice items-center py-3"><input type="radio" name="kind" value="<%= v %>" <%= values.kind === v ? 'checked' : '' %>><span class="text-[15px] font-semibold"><%= label %></span></label>
+      <% }) %>
+    </div>
+  </fieldset>
+  <% if (!post && associations.length > 1) { %>
+    <%- include('../../partials/field', { name: 'association_id', label: 'Au nom de', type: 'select', value: values.association_id, error: errors.association_id, options: associations.map((a) => [a.id, a.name]), cls: 'max-w-md' }) %>
+  <% } else if (!post) { %>
+    <input type="hidden" name="association_id" value="<%= associations[0].id %>">
+  <% } %>
+  <%- include('../../partials/field', { name: 'title', label: 'Titre', help: 'Soyez précis : « 10 bénévoles pour la collecte du 15 novembre ».', value: values.title, error: errors.title, required: true, attrs: 'maxlength="200"' }) %>
+  <%- include('../../partials/field', { name: 'body', label: 'Détails', help: 'Quoi, quand, où, et comment vous joindre.', type: 'textarea', rows: 8, value: values.body, error: errors.body, required: true }) %>
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
+    <button class="btn btn-primary"><%= post ? 'Enregistrer les modifications' : 'Publier l’annonce' %></button>
+    <a href="<%= post ? `/annonces/${post.id}` : '/annonces' %>" class="link shrink-0 whitespace-nowrap text-[15px]">Annuler</a>
   </div>
 </form>

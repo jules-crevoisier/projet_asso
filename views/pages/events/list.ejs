@@ -1,43 +1,42 @@
 <%- include('../../partials/page-header', {
   heading: past ? 'Événements passés' : 'Événements à venir',
-  subtitle: `${events.length} événement${events.length > 1 ? 's' : ''}`,
-  actions: `<a href="/evenements${query(filters, {})}" class="btn btn-secondary">${icon('CalendarDays')}Vue calendrier</a>` + (user ? `<a href="/evenements/nouveau" class="btn btn-primary">${icon('CalendarPlus')}Nouvel événement</a>` : ''),
+  subtitle: plural(events.length, 'événement'),
+  actions: `<a href="/evenements${query(filters, {})}" class="btn btn-secondary">Vue calendrier</a>` + (user ? `<a href="/evenements/nouveau" class="btn btn-primary">Publier un événement</a>` : ''),
 }) %>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-  <div class="segmented">
-    <a href="/evenements/liste<%= query(filters, {}) %>" class="<%= !past ? 'active' : '' %>">À venir</a>
-    <a href="/evenements/liste<%= query(filters, { passes: '1' }) %>" class="<%= past ? 'active' : '' %>">Passés</a>
-  </div>
-  <form method="get" class="flex flex-wrap items-center gap-2" data-autosubmit>
-    <% if (past) { %><input type="hidden" name="passes" value="1"><% } %>
-    <select name="association" class="input w-auto py-1.5" aria-label="Association">
-      <option value="">Toutes les associations</option>
-      <% associations.forEach((a) => { %><option value="<%= a.slug %>" <%= filters.association === a.slug ? 'selected' : '' %>><%= a.name %></option><% }) %>
-    </select>
-    <select name="theme" class="input w-auto py-1.5" aria-label="Thème">
-      <option value="">Tous les thèmes</option>
-      <% Object.entries(CATEGORIES).forEach(([v, l]) => { %><option value="<%= v %>" <%= filters.theme === v ? 'selected' : '' %>><%= l %></option><% }) %>
-    </select>
-    <% if (user) { %>
-      <label class="chip cursor-pointer has-[:checked]:bg-slate-900 has-[:checked]:text-white has-[:checked]:ring-slate-900">
-        <input type="checkbox" name="mes" value="1" class="sr-only" <%= filters.mes ? 'checked' : '' %>><%- icon('Users', 'size-3.5') %>Mes associations
-      </label>
-    <% } %>
-    <noscript><button class="btn btn-secondary">Filtrer</button></noscript>
-  </form>
-</div>
+<div class="grid gap-x-16 gap-y-8 lg:grid-cols-[14rem_1fr]">
+  <aside>
+    <nav class="segmented mb-6" aria-label="Période">
+      <a href="/evenements/liste<%= query(filters, {}) %>" class="<%= !past ? 'active' : '' %>" <%= !past ? 'aria-current=page' : '' %>>À venir</a>
+      <a href="/evenements/liste<%= query(filters, { passes: '1' }) %>" class="<%= past ? 'active' : '' %>" <%= past ? 'aria-current=page' : '' %>>Passés</a>
+    </nav>
+    <form method="get" class="space-y-5" data-autosubmit>
+      <% if (past) { %><input type="hidden" name="passes" value="1"><% } %>
+      <%- include('../../partials/field', { name: 'association', label: 'Association', type: 'select', value: filters.association, options: [['', 'Toutes'], ...associations.map((a) => [a.slug, a.name])] }) %>
+      <%- include('../../partials/field', { name: 'theme', label: 'Thème', type: 'select', value: filters.theme, options: [['', 'Tous'], ...Object.entries(CATEGORIES)] }) %>
+      <% if (user) { %><label class="toggle"><input type="checkbox" name="mes" value="1" class="size-4" <%= filters.mes ? 'checked' : '' %>>Seulement mes associations</label><% } %>
+      <noscript><button class="btn btn-secondary">Filtrer</button></noscript>
+    </form>
+  </aside>
 
-<div class="card overflow-hidden">
-  <% if (events.length) {
-    let lastMonth = '';
-    events.forEach((event) => {
-      const month = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(new Date(event.start_at));
-      if (month !== lastMonth) { lastMonth = month; %>
-        <div class="sticky top-14 z-10 border-y border-slate-100 bg-slate-50/95 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 backdrop-blur first:border-t-0 sm:px-6 lg:top-0"><%= month %></div>
-      <% } %>
-      <%- include('../../partials/event-row', { event }) %>
-  <% }) } else { %>
-    <%- include('../../partials/empty', { iconName: 'CalendarDays', heading: 'Aucun événement', text: 'Modifiez les filtres ou ajoutez le premier !', actionHref: user ? '/evenements/nouveau' : null, actionLabel: 'Nouvel événement' }) %>
-  <% } %>
+  <div>
+    <% if (events.length) {
+      const months = [];
+      events.forEach((e) => {
+        const m = fmt.monthYear(e.start_at);
+        if (!months.length || months[months.length - 1].label !== m) months.push({ label: m, events: [] });
+        months[months.length - 1].events.push(e);
+      }); %>
+      <div class="space-y-14">
+        <% months.forEach((m) => { %>
+          <section>
+            <h2 class="kicker mb-5"><%= m.label %></h2>
+            <%- include('../../partials/agenda', { events: m.events }) %>
+          </section>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="panel"><%- include('../../partials/empty', { heading: 'Aucun événement', text: 'Modifiez les filtres, ou publiez la première date.', actionHref: user ? '/evenements/nouveau' : null, actionLabel: 'Publier un événement' }) %></div>
+    <% } %>
+  </div>
 </div>

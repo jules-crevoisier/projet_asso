@@ -55,6 +55,12 @@ const fmt = {
   monthShort: (v) => format(v, { month: 'short' }).replace('.', ''),
   time: (v) => format(v, { hour: '2-digit', minute: '2-digit' }),
   date: (v) => format(v, { weekday: 'long', day: 'numeric', month: 'long' }),
+  weekdayShort: (v) => format(v, { weekday: 'short' }).replace('.', ''),
+  dayHeading: (v) => {
+    const s = format(v, { weekday: 'long', day: 'numeric', month: 'long' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  },
+  monthYear: (v) => format(v, { month: 'long', year: 'numeric' }),
   dateYear: (v) => format(v, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
   short: (v) => format(v, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
   full: (v) => format(v, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),

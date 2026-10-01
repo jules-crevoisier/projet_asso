@@ -1,116 +1,124 @@
 <%
-  const hour = Number(new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', hour12: false, timeZone: 'Europe/Paris' }).format(new Date()));
-  const hello = hour < 5 || hour >= 18 ? 'Bonsoir' : 'Bonjour';
+  // 7 prochains jours
+  const today = parisDateKey();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(`${today}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    return { key, date: d, events: week.filter((e) => parisDateKey(e.start_at) === key) };
+  });
 %>
 <%- include('../partials/page-header', {
-  eyebrow: fmt.dateYear(new Date()).replace(/^./, (c) => c.toUpperCase()),
-  heading: `${hello} ${user.first_name} 👋`,
-  subtitle: 'Voici ce qui se passe entre les associations.',
-  actions: `<a href="/annonces/nouvelle" class="btn btn-secondary">${icon('Megaphone')}Annonce</a><a href="/evenements/nouveau" class="btn btn-primary">${icon('CalendarPlus')}Nouvel événement</a>`,
+  kicker: fmt.dayHeading(new Date()),
+  heading: 'Tableau de bord',
+  actions: `<a href="/annonces/nouvelle" class="btn btn-secondary">Publier une annonce</a><a href="/evenements/nouveau" class="btn btn-primary">Publier un événement</a>`,
 }) %>
 
 <% if (pending.length) { %>
-  <div id="demandes" class="card mb-6 overflow-hidden ring-brand-600/20">
-    <div class="flex items-center gap-3 bg-brand-50/60 px-5 py-3.5 sm:px-6">
-      <%- icon('Inbox', 'size-5 text-brand-600') %>
-      <p class="text-sm font-semibold text-brand-900"><%= plural(pending.length, 'demande') %> d'adhésion à traiter</p>
-    </div>
-    <div class="divide-list">
+  <section id="demandes" class="mb-10 rounded-lg border border-accent/40 bg-surface">
+    <h2 class="border-b border-line px-5 py-3.5 font-bold"><span class="text-accent"><%= plural(pending.length, 'demande') %> d'adhésion</span> à traiter</h2>
+    <ul class="rows">
       <% pending.forEach((m) => { %>
-        <div class="flex flex-wrap items-center gap-4 px-5 py-3 sm:px-6">
-          <%- include('../partials/avatar', { first: m.first_name, last: m.last_name }) %>
-          <div class="min-w-0 flex-1 text-sm">
-            <p><span class="font-semibold"><%= m.first_name %> <%= m.last_name %></span> <span class="text-slate-500">souhaite rejoindre</span> <a class="font-medium text-brand-700 hover:underline" href="/associations/<%= m.slug %>"><%= m.association_name %></a></p>
-            <% if (m.message) { %><p class="truncate text-slate-500">« <%= m.message %> »</p><% } %>
+        <li class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center">
+          <div class="min-w-0 flex-1">
+            <p><strong><%= m.first_name %> <%= m.last_name %></strong> veut rejoindre <a class="link" href="/associations/<%= m.slug %>"><%= m.association_name %></a></p>
+            <% if (m.message) { %><p class="meta mt-0.5">« <%= m.message %> »</p><% } %>
           </div>
           <div class="flex gap-2">
+            <form method="post" action="/associations/<%= m.slug %>/membres/<%= m.id %>/accepter"><%- include('../partials/csrf') %><button class="btn btn-primary btn-sm">Accepter</button></form>
             <form method="post" action="/associations/<%= m.slug %>/membres/<%= m.id %>/retirer"><%- include('../partials/csrf') %><button class="btn btn-secondary btn-sm">Refuser</button></form>
-            <form method="post" action="/associations/<%= m.slug %>/membres/<%= m.id %>/accepter"><%- include('../partials/csrf') %><button class="btn btn-primary btn-sm"><%- icon('Check', 'size-3.5') %>Accepter</button></form>
           </div>
-        </div>
+        </li>
       <% }) %>
-    </div>
-  </div>
+    </ul>
+  </section>
 <% } %>
 
 <% if (!myAssociations.length) { %>
-  <div class="card relative mb-6 overflow-hidden">
-    <div class="absolute inset-y-0 right-0 hidden w-1/3 bg-gradient-to-l from-brand-50 to-transparent sm:block"></div>
-    <div class="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-      <span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-lg shadow-brand-600/30"><%- icon('Sparkles', 'size-7') %></span>
-      <div class="flex-1">
-        <h2 class="text-lg font-semibold">Pour commencer, rejoignez votre association</h2>
-        <p class="mt-1 text-sm text-slate-600">Elle est peut-être déjà inscrite. Sinon, créez sa fiche en deux minutes.
-          <% if (myPending.length) { %><br><span class="font-medium text-amber-700">En attente : <%= myPending.map((m) => m.name).join(', ') %></span><% } %></p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <a href="/associations" class="btn btn-primary"><%- icon('Search') %>Trouver mon association</a>
-        <a href="/associations/nouvelle" class="btn btn-secondary"><%- icon('Plus') %>L'inscrire</a>
-      </div>
+  <section class="notice notice-info mb-10 flex-col gap-3 py-5 sm:flex-row sm:items-center">
+    <div class="flex-1">
+      <p class="font-bold">Rejoignez votre association pour publier</p>
+      <p class="mt-0.5 text-ink-2">Elle est peut-être déjà inscrite. Sinon, créez sa fiche : un modérateur la vérifiera.<% if (myPending.length) { %> Demande en attente : <%= myPending.map((m) => m.name).join(', ') %>.<% } %></p>
     </div>
-  </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="/associations" class="btn btn-primary">Trouver mon association</a>
+      <a href="/associations/nouvelle" class="btn btn-secondary">L'inscrire</a>
+    </div>
+  </section>
 <% } %>
 
-<div class="grid gap-6 lg:grid-cols-3">
-  <div class="space-y-6 lg:col-span-2">
-    <% if (myAssociations.length) { %>
-      <section class="card overflow-hidden">
-        <div class="card-header"><h2 class="card-title">Mes prochains événements</h2><a class="card-link" href="/evenements?mes=1">Mon calendrier <%- icon('ArrowRight', 'size-3.5') %></a></div>
-        <div class="divide-list">
-          <% if (myEvents.length) { myEvents.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) } else { %>
-            <%- include('../partials/empty', { iconName: 'CalendarPlus', heading: 'Rien de prévu', text: 'Ajoutez les dates de vos associations au calendrier commun.', actionHref: '/evenements/nouveau', actionLabel: 'Ajouter un événement' }) %>
-          <% } %>
-        </div>
-      </section>
-    <% } %>
-    <section class="card overflow-hidden">
-      <div class="card-header"><h2 class="card-title">Prochainement à <%= city %></h2><a class="card-link" href="/evenements">Calendrier <%- icon('ArrowRight', 'size-3.5') %></a></div>
-      <div class="divide-list">
-        <% if (upcoming.length) { upcoming.forEach((event) => { %><%- include('../partials/event-row', { event }) %><% }) } else { %>
-          <%- include('../partials/empty', { iconName: 'CalendarDays', heading: 'Aucun événement à venir' }) %>
-        <% } %>
-      </div>
-    </section>
+<section class="mb-12" aria-labelledby="semaine">
+  <div class="mb-4 flex items-baseline justify-between gap-4">
+    <h2 id="semaine" class="h-section">Les 7 prochains jours</h2>
+    <a href="/evenements" class="link shrink-0 whitespace-nowrap text-[15px]">Ouvrir l'agenda</a>
   </div>
-
-  <div class="space-y-6">
-    <% if (myAssociations.length) { %>
-      <section class="card overflow-hidden">
-        <div class="card-header"><h2 class="card-title">Mes associations</h2><a class="card-link" href="/associations/nouvelle"><%- icon('Plus', 'size-3.5') %></a></div>
-        <div class="divide-list">
-          <% myAssociations.forEach((a) => { %>
-            <a href="/associations/<%= a.slug %>" class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
-              <%- include('../partials/avatar', { first: a.name, color: a.color, size: 'size-9 text-xs rounded-xl' }) %>
-              <span class="min-w-0 flex-1 truncate text-sm font-medium"><%= a.name %></span>
-              <% if (!a.can_publish) { %><span class="badge badge-amber"><%- icon('Hourglass', 'size-3') %>En validation</span><% } %>
-            </a>
+  <ol class="grid overflow-hidden rounded-lg border border-line bg-surface md:grid-cols-7">
+    <% days.forEach((d, i) => { %>
+      <li class="grid grid-cols-[4.5rem_1fr] gap-3 border-line p-3 md:block md:min-h-36 <%= i ? 'border-t md:border-l md:border-t-0' : '' %> <%= d.events.length > 1 ? 'bg-accent-soft/40' : '' %>">
+        <p class="flex items-baseline justify-between gap-2 md:mb-2">
+          <span><span class="kicker <%= i === 0 ? 'text-accent' : '' %>"><%= i === 0 ? 'Auj.' : fmt.weekdayShort(d.date) %></span> <span class="tnum text-[20px] font-medium"><%= d.date.getUTCDate() %></span></span>
+          <% if (d.events.length > 1) { %><span class="hidden text-[12px] font-bold text-accent md:inline"><%= d.events.length %> év.</span><% } %>
+        </p>
+        <ul class="space-y-1.5 self-center">
+          <% d.events.forEach((e) => { %>
+            <li><a href="/evenements/<%= e.id %>" class="block rounded-[3px] border-l-[3px] px-2 py-1 text-[13px] leading-tight hover:brightness-95" style="border-color: <%= e.association_color %>; background: <%= tint(e.association_color) %>"><span class="tnum text-ink-2"><%= fmt.time(e.start_at) %></span> <span class="font-semibold"><%= e.title %></span></a></li>
           <% }) %>
-        </div>
+          <% if (!d.events.length) { %><li class="text-[13px] text-ink-3">Libre</li><% } %>
+        </ul>
+      </li>
+    <% }) %>
+  </ol>
+</section>
+
+<div class="grid gap-x-12 gap-y-12 lg:grid-cols-[2fr_1fr]">
+  <section aria-labelledby="mes-evenements">
+    <div class="mb-4 flex items-baseline justify-between gap-4 border-b border-ink pb-2">
+      <h2 id="mes-evenements" class="h-section"><%= myAssociations.length ? 'Événements de vos associations' : 'Prochainement' %></h2>
+      <a href="/evenements/liste<%= myAssociations.length ? '?mes=1' : '' %>" class="link shrink-0 whitespace-nowrap text-[15px]">Tout voir</a>
+    </div>
+    <% const list = myAssociations.length ? myEvents : upcoming; %>
+    <% if (list.length) { %>
+      <%- include('../partials/agenda', { events: list, showCount: false }) %>
+    <% } else { %>
+      <p class="py-6 text-ink-2">Rien de prévu pour l'instant. <a class="link" href="/evenements/nouveau">Ajouter une date</a></p>
+    <% } %>
+  </section>
+
+  <aside class="space-y-10">
+    <% if (myAssociations.length) { %>
+      <section>
+        <h2 class="mb-3 border-b border-ink pb-2 h-block">Vos associations</h2>
+        <ul class="space-y-1">
+          <% myAssociations.forEach((a) => { %>
+            <li class="flex items-center gap-3 py-1.5">
+              <span class="swatch size-3" style="background-color: <%= a.color %>"></span>
+              <a class="link-quiet min-w-0 flex-1 truncate" href="/associations/<%= a.slug %>"><%= a.name %></a>
+              <% if (!a.can_publish) { %><span class="tag tag-warn">En validation</span><% } %>
+            </li>
+          <% }) %>
+        </ul>
       </section>
     <% } %>
 
     <% if (volunteering.length) { %>
-      <section class="card overflow-hidden">
-        <div class="card-header"><h2 class="card-title">Je suis bénévole</h2></div>
-        <div class="divide-list">
-          <% volunteering.forEach((v) => { %>
-            <a href="/evenements/<%= v.id %>" class="flex items-center gap-3 px-5 py-3 text-sm hover:bg-slate-50 sm:px-6">
-              <%- icon('HandHeart', 'size-4 text-amber-500') %>
-              <span class="min-w-0 flex-1 truncate font-medium"><%= v.title %></span>
-              <span class="text-xs text-slate-500"><%= fmt.short(v.start_at) %></span>
-            </a>
-          <% }) %>
-        </div>
+      <section>
+        <h2 class="mb-3 border-b border-ink pb-2 h-block">Vous êtes bénévole</h2>
+        <ul class="space-y-2">
+          <% volunteering.forEach((v) => { %><li><a class="link-quiet font-semibold" href="/evenements/<%= v.id %>"><%= v.title %></a><p class="meta tnum"><%= fmt.short(v.start_at) %></p></li><% }) %>
+        </ul>
       </section>
     <% } %>
 
-    <section class="card overflow-hidden">
-      <div class="card-header"><h2 class="card-title">Dernières annonces</h2><a class="card-link" href="/annonces">Toutes <%- icon('ArrowRight', 'size-3.5') %></a></div>
-      <div class="divide-list">
+    <section>
+      <div class="mb-1 flex items-baseline justify-between border-b border-ink pb-2">
+        <h2 class="h-block">Annonces récentes</h2>
+        <a href="/annonces" class="link shrink-0 whitespace-nowrap text-[15px]">Toutes</a>
+      </div>
+      <div class="rows -mx-5">
         <% if (posts.length) { posts.forEach((post) => { %><%- include('../partials/post-row', { post }) %><% }) } else { %>
-          <%- include('../partials/empty', { iconName: 'Megaphone', heading: 'Aucune annonce', text: 'Besoin de bras ou de matériel ? Demandez !' }) %>
+          <p class="px-5 py-6 text-ink-2">Aucune annonce. <a class="link" href="/annonces/nouvelle">Demander un coup de main</a></p>
         <% } %>
       </div>
     </section>
-  </div>
+  </aside>
 </div>

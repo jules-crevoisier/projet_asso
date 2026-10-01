@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS associations (
   phone              TEXT NOT NULL DEFAULT '',
   website            TEXT NOT NULL DEFAULT '',
   address            TEXT NOT NULL DEFAULT '',
-  color              TEXT NOT NULL DEFAULT '#6366f1',
+  color              TEXT NOT NULL DEFAULT '#34478a',
   is_validated       INTEGER NOT NULL DEFAULT 0,
   created_by         INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))

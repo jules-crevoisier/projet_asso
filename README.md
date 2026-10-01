@@ -5,6 +5,9 @@ annuaire, **calendrier partagé**, co-organisation d'événements et annonces d'
 
 **Stack** : Node.js (Express 5) · EJS · Tailwind CSS 4 · SQLite (better-sqlite3) · FullCalendar
 
+Les règles de design (typographie, couleurs, accessibilité, ce qu'on s'interdit) et leurs
+sources sont dans [`docs/design.md`](docs/design.md).
+
 ## Démarrer
 
 Prérequis : **Node.js 20 ou plus récent**.
@@ -96,7 +99,8 @@ npm test
 | `src/schema.sql` | Schéma de la base |
 | `src/lib/` | Dates (fuseau de Paris), iCal, sécurité, permissions, e-mails |
 | `views/` | Gabarits EJS (mise en page, composants, pages) |
-| `styles/app.css` | Design system Tailwind (boutons, cartes, champs, habillage du calendrier) |
+| `styles/app.css` | Jetons de design et composants Tailwind (voir `docs/design.md`) |
+| `docs/design.md` | Charte de design |
 | `public/js/` | JavaScript navigateur : calendrier, alerte de conflit, menus |
 | `scripts/` | Données de démo, création d'un modérateur |
 | `test/` | Tests (`node:test` + supertest) |

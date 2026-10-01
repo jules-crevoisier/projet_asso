@@ -1,45 +1,43 @@
-<%- include('../../partials/page-header', { heading: title, subtitle: association ? 'Ces informations sont visibles dans l’annuaire.' : 'Vous en deviendrez automatiquement responsable.' }) %>
+<%- include('../../partials/page-header', {
+  heading: title,
+  subtitle: association ? 'Ces informations apparaissent dans l’annuaire.' : 'Vous en deviendrez responsable. Un modérateur vérifie chaque nouvelle association avant qu’elle puisse publier.',
+}) %>
 
-<form method="post" class="grid gap-6 lg:grid-cols-3">
+<form method="post" class="max-w-2xl space-y-12" novalidate>
   <%- include('../../partials/csrf') %>
-  <div class="space-y-6 lg:col-span-2">
-    <section class="card card-pad space-y-5">
-      <h2 class="card-title">L'association</h2>
-      <%- include('../../partials/field', { name: 'name', label: 'Nom', value: values.name, error: errors.name, required: true, attrs: 'maxlength="150"' }) %>
-      <%- include('../../partials/field', { name: 'category', label: 'Domaine', type: 'select', value: values.category, options: Object.entries(CATEGORIES) }) %>
-      <%- include('../../partials/field', { name: 'short_description', label: 'En une phrase', value: values.short_description, error: errors.short_description, required: true, placeholder: 'Ex. : Club de théâtre amateur pour tous les âges', attrs: 'maxlength="200"' }) %>
-      <%- include('../../partials/field', { name: 'description', label: 'Présentation', type: 'textarea', rows: 6, value: values.description, placeholder: 'Vos activités, vos valeurs, comment nous rejoindre…' }) %>
-    </section>
-    <section class="card card-pad space-y-5">
-      <h2 class="card-title">Coordonnées</h2>
-      <div class="grid gap-5 sm:grid-cols-2">
-        <%- include('../../partials/field', { name: 'email', label: 'E-mail de contact', type: 'email', value: values.email, error: errors.email }) %>
-        <%- include('../../partials/field', { name: 'phone', label: 'Téléphone', type: 'tel', value: values.phone }) %>
-      </div>
-      <%- include('../../partials/field', { name: 'website', label: 'Site web', value: values.website, error: errors.website, placeholder: 'www.mon-asso.fr' }) %>
-      <%- include('../../partials/field', { name: 'address', label: 'Adresse', value: values.address }) %>
-    </section>
-  </div>
+  <fieldset class="space-y-6">
+    <legend class="h-section mb-6">L'association</legend>
+    <%- include('../../partials/field', { name: 'name', label: 'Nom', value: values.name, error: errors.name, required: true, attrs: 'maxlength="150"' }) %>
+    <%- include('../../partials/field', { name: 'category', label: 'Domaine', type: 'select', value: values.category, options: Object.entries(CATEGORIES), cls: 'max-w-sm' }) %>
+    <%- include('../../partials/field', { name: 'short_description', label: 'Description en une phrase', help: 'Elle s’affiche dans l’annuaire. Par exemple : « Club de théâtre amateur pour tous les âges ».', value: values.short_description, error: errors.short_description, required: true, attrs: 'maxlength="200"' }) %>
+    <%- include('../../partials/field', { name: 'description', label: 'Présentation', optional: true, help: 'Vos activités, vos horaires, comment vous rejoindre.', type: 'textarea', rows: 6, value: values.description }) %>
+  </fieldset>
 
-  <div class="space-y-6">
-    <section class="card card-pad">
-      <h2 class="card-title">Couleur</h2>
-      <p class="mt-1 text-sm text-slate-500">Elle identifie vos événements dans le calendrier.</p>
-      <div class="mt-4 grid grid-cols-6 gap-2.5">
-        <% COLORS.forEach((c, i) => { const checked = values.color ? values.color === c : (!association && i === 0); %>
-          <label class="relative cursor-pointer">
-            <input type="radio" name="color" value="<%= c %>" class="peer sr-only" <%= checked ? 'checked' : '' %>>
-            <span class="block aspect-square rounded-full ring-2 ring-transparent ring-offset-2 transition peer-checked:ring-slate-900 peer-focus-visible:ring-brand-500" style="background-color: <%= c %>"></span>
-          </label>
-        <% }) %>
-      </div>
-    </section>
-    <div class="card card-pad flex flex-col gap-2">
-      <button class="btn btn-primary w-full"><%= association ? 'Enregistrer' : 'Inscrire l’association' %></button>
-      <a href="<%= association ? `/associations/${association.slug}` : '/associations' %>" class="btn btn-ghost w-full">Annuler</a>
+  <fieldset class="space-y-6 border-t border-line pt-10">
+    <legend class="h-section mb-6 float-left w-full">Coordonnées</legend>
+    <div class="clear-left grid gap-6 sm:grid-cols-2">
+      <%- include('../../partials/field', { name: 'email', label: 'E-mail de contact', optional: true, type: 'email', value: values.email, error: errors.email, attrs: 'spellcheck="false"' }) %>
+      <%- include('../../partials/field', { name: 'phone', label: 'Téléphone', optional: true, type: 'tel', value: values.phone }) %>
     </div>
-    <% if (!association && requireValidation && !user.is_staff) { %>
-      <p class="flex gap-2 px-1 text-xs text-slate-500"><%- icon('ShieldCheck', 'size-4 text-slate-400') %>Un modérateur vérifie chaque nouvelle association avant qu'elle puisse publier.</p>
-    <% } %>
+    <%- include('../../partials/field', { name: 'website', label: 'Site web', optional: true, value: values.website, error: errors.website, placeholder: 'www.exemple.fr', attrs: 'spellcheck="false"' }) %>
+    <%- include('../../partials/field', { name: 'address', label: 'Adresse', optional: true, value: values.address }) %>
+  </fieldset>
+
+  <fieldset class="border-t border-line pt-10">
+    <legend class="h-section mb-2 float-left w-full">Couleur dans l'agenda</legend>
+    <p class="hint clear-left mb-4">Elle repère vos événements dans le calendrier commun.</p>
+    <div class="flex max-w-md flex-wrap gap-2">
+      <% COLORS.forEach((c, i) => { const checked = values.color ? values.color === c : (!association && i === 0); %>
+        <label class="cursor-pointer">
+          <input type="radio" name="color" value="<%= c %>" class="peer sr-only" <%= checked ? 'checked' : '' %>>
+          <span class="block size-10 rounded-md border-2 border-transparent outline-offset-2 peer-checked:border-surface peer-checked:outline-2 peer-checked:outline-ink peer-focus-visible:outline-2 peer-focus-visible:outline-accent" style="background-color: <%= c %>"><span class="sr-only">Couleur <%= i + 1 %></span></span>
+        </label>
+      <% }) %>
+    </div>
+  </fieldset>
+
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
+    <button class="btn btn-primary"><%= association ? 'Enregistrer les modifications' : 'Inscrire l’association' %></button>
+    <a href="<%= association ? `/associations/${association.slug}` : '/associations' %>" class="link shrink-0 whitespace-nowrap text-[15px]">Annuler</a>
   </div>
 </form>

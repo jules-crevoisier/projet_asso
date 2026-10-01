@@ -134,7 +134,7 @@ test('API du calendrier : filtres et visibilité', async () => {
   assert.equal(events.length, 2);
   events = (await c.get(`/api/evenements?${range}&mes=1`)).body;
   assert.deepEqual(events.map((e) => e.title), ['Fête du vélo']);
-  assert.equal(events[0].backgroundColor, models.associations.bySlug('velo').color);
+  assert.equal(events[0].borderColor, models.associations.bySlug('velo').color);
   assert.equal((await c.get('/api/evenements')).status, 400);
 });
 

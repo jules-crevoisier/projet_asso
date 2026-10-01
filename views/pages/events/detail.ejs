@@ -1,177 +1,146 @@
-<div class="mb-6">
-  <a href="/evenements" class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-900"><%- icon('ChevronLeft') %>Calendrier</a>
-</div>
+<p class="mb-6"><a href="/evenements" class="link shrink-0 whitespace-nowrap text-[15px]">Retour à l'agenda</a></p>
 
-<div class="card mb-6 overflow-hidden">
-  <div class="h-2" style="background-color: <%= event.association_color %>"></div>
-  <div class="flex flex-col gap-6 p-5 sm:p-8 lg:flex-row lg:items-start">
-    <div class="w-20 shrink-0 overflow-hidden rounded-2xl text-center ring-1 ring-slate-200">
-      <div class="py-1 text-xs font-semibold uppercase tracking-wide" style="background-color: <%= event.association_color %>; color: <%= contrast(event.association_color) %>"><%= fmt.monthShort(event.start_at) %></div>
-      <div class="py-2 text-3xl font-bold"><%= fmt.day(event.start_at) %></div>
-    </div>
-    <div class="min-w-0 flex-1">
-      <div class="flex flex-wrap gap-2">
-        <span class="badge badge-slate"><%= CATEGORIES[event.category] %></span>
-        <% if (event.visibility === 'network') { %><span class="badge badge-indigo"><%- icon('Lock', 'size-3') %>Réservé au réseau</span><% } else { %><span class="badge badge-emerald"><%- icon('Earth', 'size-3') %>Public</span><% } %>
-      </div>
-      <h1 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl"><%= event.title %></h1>
-      <div class="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-        <span class="flex items-start gap-2.5"><%- icon('Clock', 'size-4 mt-0.5 text-slate-400') %><span class="first-letter:uppercase"><%= fmt.range(event.start_at, event.end_at) %></span></span>
-        <span class="flex items-start gap-2.5"><%- icon('MapPin', 'size-4 mt-0.5 text-slate-400') %><%= event.location %></span>
-        <a href="/associations/<%= event.association_slug %>" class="flex items-center gap-2.5 hover:text-brand-700"><span class="size-4 grid place-items-center"><span class="size-2.5 rounded-full" style="background-color: <%= event.association_color %>"></span></span>Organisé par <span class="font-medium text-slate-900"><%= event.association_name %></span></a>
-      </div>
-    </div>
-    <div class="flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
-      <a href="/evenements/<%= event.id %>/evenement.ics" class="btn btn-secondary"><%- icon('CalendarPlus') %>Ajouter à mon agenda</a>
+<header class="mb-10 border-b border-line pb-8">
+  <p class="kicker mb-3 flex flex-wrap items-center gap-2">
+    <span class="swatch size-3" style="background-color: <%= event.association_color %>"></span>
+    <a class="link-quiet normal-case tracking-normal" href="/associations/<%= event.association_slug %>"><%= event.association_name %></a>
+    <span aria-hidden="true">·</span><span><%= CATEGORIES[event.category] %></span>
+    <% if (event.visibility === 'network') { %><span aria-hidden="true">·</span><span>Réservé aux associations</span><% } %>
+  </p>
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <h1 class="h-page max-w-3xl"><%= event.title %></h1>
+    <div class="flex shrink-0 flex-wrap gap-2">
+      <a href="/evenements/<%= event.id %>/evenement.ics" class="btn btn-secondary">Ajouter à mon agenda</a>
       <% if (canEdit) { %>
-        <a href="/evenements/<%= event.id %>/modifier" class="btn btn-secondary"><%- icon('Pencil') %>Modifier</a>
+        <a href="/evenements/<%= event.id %>/modifier" class="btn btn-secondary">Modifier</a>
         <form method="post" action="/evenements/<%= event.id %>/supprimer" data-confirm="Supprimer définitivement cet événement ?">
-          <%- include('../../partials/csrf') %><button class="btn btn-danger w-full"><%- icon('Trash2') %>Supprimer</button>
+          <%- include('../../partials/csrf') %><button class="btn btn-danger">Supprimer</button>
         </form>
       <% } %>
     </div>
   </div>
-</div>
+  <dl class="mt-8 grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
+    <div><dt class="meta">Quand</dt><dd class="tnum mt-0.5 text-[20px] first-letter:uppercase"><%= fmt.range(event.start_at, event.end_at) %></dd></div>
+    <div><dt class="meta">Où</dt><dd class="mt-0.5 font-serif text-[20px]"><%= event.location %></dd></div>
+  </dl>
+</header>
 
 <% if (conflicts.length) { %>
-  <div class="mb-6 flex gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-inset ring-amber-600/15 sm:p-5">
-    <%- icon('TriangleAlert', 'size-5 text-amber-500') %>
-    <div>
-      <p class="font-semibold">Sur le même créneau</p>
-      <ul class="mt-1 space-y-0.5">
-        <% conflicts.forEach((c) => { %><li><a class="font-medium underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600" href="/evenements/<%= c.id %>"><%= c.title %></a> — <%= c.association_name %>, <%= fmt.time(c.start_at) %>–<%= fmt.time(c.end_at) %>, <%= c.location %></li><% }) %>
-      </ul>
-    </div>
+  <div class="notice notice-warn mb-10 flex-col gap-1">
+    <p class="font-bold">Sur le même créneau</p>
+    <ul class="space-y-0.5">
+      <% conflicts.forEach((c) => { %><li><span class="swatch mr-1.5" style="background-color: <%= c.association_color %>"></span><a class="link-quiet font-semibold" href="/evenements/<%= c.id %>"><%= c.title %></a>, <%= c.association_name %>, <span class="tnum"><%= fmt.time(c.start_at) %>–<%= fmt.time(c.end_at) %></span>, <%= c.location %></li><% }) %>
+    </ul>
   </div>
 <% } %>
 
-<div class="grid gap-6 lg:grid-cols-3">
-  <div class="space-y-6 lg:col-span-2">
-    <section class="card card-pad">
-      <h2 class="card-title mb-3">À propos</h2>
-      <div class="prose-text"><%= event.description %></div>
+<div class="grid gap-x-16 gap-y-12 lg:grid-cols-[2fr_1fr]">
+  <div class="space-y-12">
+    <section aria-label="Description">
+      <div class="prose-text text-[17px]"><%= event.description %></div>
     </section>
 
     <% if (user) { %>
-      <section class="card overflow-hidden" id="discussion">
-        <div class="card-header"><h2 class="card-title">Discussion entre associations</h2><span class="text-sm text-slate-500"><%= comments.length %></span></div>
-        <div class="divide-list">
+      <section id="discussion" aria-labelledby="discussion-titre">
+        <h2 id="discussion-titre" class="h-section mb-1 border-b border-ink pb-2">Discussion <span class="font-sans text-[16px] font-normal text-ink-3"><%= comments.length %></span></h2>
+        <p class="meta mb-4">Visible par les membres connectés : questions, propositions d'aide, organisation.</p>
+        <ol class="rows">
           <% comments.forEach((c) => { %>
-            <div class="flex gap-3 px-5 py-4 sm:px-6">
-              <%- include('../../partials/avatar', { first: c.first_name, last: c.last_name, size: 'size-9 text-xs' }) %>
+            <li class="flex gap-3 py-4">
+              <%- include('../../partials/avatar', { first: c.first_name, last: c.last_name }) %>
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="font-semibold"><%= c.first_name %> <%= c.last_name %></span>
-                  <span class="text-slate-400"><%= fmt.ago(c.created_at) %></span>
-                  <% if (c.user_id === user.id || canEdit) { %>
-                    <form method="post" action="/evenements/commentaires/<%= c.id %>/supprimer" class="ml-auto" data-confirm="Supprimer ce message ?"><%- include('../../partials/csrf') %><button class="text-slate-300 hover:text-red-500" aria-label="Supprimer"><%- icon('Trash2', 'size-3.5') %></button></form>
-                  <% } %>
-                </div>
-                <p class="prose-text mt-1 text-sm"><%= c.body %></p>
+                <p class="flex flex-wrap items-baseline gap-x-2"><strong><%= c.first_name %> <%= c.last_name %></strong><span class="meta"><%= fmt.ago(c.created_at) %></span></p>
+                <p class="prose-text mt-1"><%= c.body %></p>
+                <% if (c.user_id === user.id || canEdit) { %>
+                  <form method="post" action="/evenements/commentaires/<%= c.id %>/supprimer" class="mt-1" data-confirm="Supprimer ce message ?"><%- include('../../partials/csrf') %><button class="link-quiet text-[14px] text-ink-3">Supprimer</button></form>
+                <% } %>
               </div>
-            </div>
+            </li>
           <% }) %>
-        </div>
-        <form method="post" action="/evenements/<%= event.id %>/commentaires" class="flex gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
+        </ol>
+        <form method="post" action="/evenements/<%= event.id %>/commentaires" class="mt-4 space-y-3 border-t border-line pt-5">
           <%- include('../../partials/csrf') %>
-          <%- include('../../partials/avatar', { first: user.first_name, last: user.last_name, size: 'size-9 text-xs' }) %>
-          <div class="flex-1">
-            <textarea name="body" rows="2" class="input" placeholder="Une question, une proposition d'aide…" required></textarea>
-            <div class="mt-2 flex justify-end"><button class="btn btn-primary btn-sm"><%- icon('Send', 'size-3.5') %>Envoyer</button></div>
-          </div>
+          <label for="comment" class="label">Écrire un message</label>
+          <textarea id="comment" name="body" rows="3" class="input" required></textarea>
+          <button class="btn btn-primary">Envoyer</button>
         </form>
       </section>
     <% } else { %>
-      <div class="card card-pad flex flex-col items-center gap-3 text-center sm:flex-row sm:text-left">
-        <span class="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600"><%- icon('MessageCircle', 'size-5') %></span>
-        <p class="flex-1 text-sm text-slate-600">Vous êtes une association ? Connectez-vous pour proposer votre aide, échanger avec les organisateurs ou vous inscrire comme bénévole.</p>
-        <a href="/connexion" class="btn btn-primary">Se connecter</a>
-      </div>
+      <p class="notice notice-info">Vous représentez une association ? <a class="link ml-1" href="/connexion">Connectez-vous</a> pour proposer votre aide, vous inscrire comme bénévole ou écrire aux organisateurs.</p>
     <% } %>
   </div>
 
-  <div class="space-y-6">
-    <section class="card overflow-hidden">
-      <div class="card-header"><h2 class="card-title">Associations impliquées</h2></div>
-      <div class="divide-list">
-        <a href="/associations/<%= event.association_slug %>" class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 sm:px-6">
-          <%- include('../../partials/avatar', { first: event.association_name, color: event.association_color, size: 'size-9 text-xs rounded-xl' }) %>
-          <span class="min-w-0 flex-1 truncate text-sm font-medium"><%= event.association_name %></span>
-          <span class="badge badge-brand">Organisatrice</span>
-        </a>
-        <% participations.forEach((p) => { %>
-          <div class="px-5 py-3 sm:px-6">
-            <div class="flex items-center gap-3">
-              <%- include('../../partials/avatar', { first: p.name, color: p.color, size: 'size-9 text-xs rounded-xl' }) %>
-              <div class="min-w-0 flex-1">
-                <a href="/associations/<%= p.slug %>" class="block truncate text-sm font-medium hover:text-brand-700"><%= p.name %></a>
-                <span class="text-xs text-slate-500"><%= PARTICIPATION_KINDS[p.kind] %></span>
-              </div>
-              <% if (user && (canEdit || myAssociationIds.has(p.association_id))) { %>
-                <form method="post" action="/evenements/participations/<%= p.id %>/supprimer" data-confirm="Retirer cette association ?"><%- include('../../partials/csrf') %><button class="text-slate-300 hover:text-red-500" aria-label="Retirer"><%- icon('X') %></button></form>
-              <% } %>
-            </div>
-            <% if (p.message) { %><p class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">« <%= p.message %> »</p><% } %>
-          </div>
-        <% }) %>
-      </div>
-      <% if (availableAssociations.length) { %>
-        <div class="border-t border-slate-100 p-4 sm:px-6">
-          <button type="button" class="btn btn-secondary w-full" data-toggle="#participate-form"><%- icon('Handshake') %>Associer mon association</button>
-          <form id="participate-form" method="post" action="/evenements/<%= event.id %>/participer" class="mt-4 hidden space-y-4">
-            <%- include('../../partials/csrf') %>
-            <% if (availableAssociations.length > 1) { %>
-              <%- include('../../partials/field', { name: 'association_id', label: 'Au nom de', type: 'select', options: availableAssociations.map((a) => [a.id, a.name]) }) %>
-            <% } else { %>
-              <input type="hidden" name="association_id" value="<%= availableAssociations[0].id %>">
-              <p class="text-sm text-slate-600">Au nom de <strong><%= availableAssociations[0].name %></strong></p>
-            <% } %>
-            <%- include('../../partials/field', { name: 'kind', label: 'Votre rôle', type: 'select', options: Object.entries(PARTICIPATION_KINDS), value: 'participant' }) %>
-            <%- include('../../partials/field', { name: 'message', label: 'Message', placeholder: 'Ex. : on apporte 2 barnums', attrs: 'maxlength="300"' }) %>
-            <button class="btn btn-primary w-full">Confirmer</button>
-          </form>
-        </div>
-      <% } %>
-    </section>
-
+  <aside class="space-y-10">
     <% if (event.volunteers_needed || event.material_needs) { %>
-      <section class="card card-pad">
-        <h2 class="card-title">Besoins</h2>
+      <section>
+        <h2 class="h-block mb-3 border-b border-ink pb-2">Besoins</h2>
         <% if (event.volunteers_needed) { const pct = Math.min(100, Math.round(event.nb_volunteers / event.volunteers_needed * 100)); %>
-          <div class="mt-4">
-            <div class="flex items-baseline justify-between text-sm">
-              <span class="flex items-center gap-2 font-medium"><%- icon('HandHeart', 'size-4 text-amber-500') %>Bénévoles</span>
-              <span class="text-slate-500"><strong class="text-slate-900"><%= event.nb_volunteers %></strong> / <%= event.volunteers_needed %></span>
-            </div>
-            <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500" style="width: <%= pct %>%"></div></div>
-            <% if (user) { %>
-              <form method="post" action="/evenements/<%= event.id %>/benevole" class="mt-4">
-                <%- include('../../partials/csrf') %>
-                <% if (isVolunteer) { %><button class="btn btn-secondary w-full"><%- icon('Check') %>Inscrit·e — se désinscrire</button>
-                <% } else { %><button class="btn btn-primary w-full"><%- icon('HandHeart') %>Je me propose</button><% } %>
-              </form>
-            <% } %>
-            <% if (volunteers.length) { %>
-              <ul class="mt-4 space-y-2 border-t border-slate-100 pt-4">
-                <% volunteers.forEach((v) => { %>
-                  <li class="flex items-center gap-2.5 text-sm">
-                    <%- include('../../partials/avatar', { first: v.first_name, last: v.last_name, size: 'size-7 text-[10px]' }) %>
-                    <span class="min-w-0 flex-1 truncate"><%= v.first_name %> <%= v.last_name %></span>
-                    <a href="mailto:<%= v.email %>" class="text-slate-400 hover:text-brand-600" title="<%= v.email %>"><%- icon('Mail', 'size-4') %></a>
-                    <% if (v.phone) { %><a href="tel:<%= v.phone %>" class="text-slate-400 hover:text-brand-600" title="<%= v.phone %>"><%- icon('Phone', 'size-4') %></a><% } %>
-                  </li>
-                <% }) %>
-              </ul>
-            <% } %>
-          </div>
+          <p class="flex items-baseline justify-between"><span class="font-bold">Bénévoles</span><span class="tnum text-ink-2"><strong class="text-ink"><%= event.nb_volunteers %></strong> sur <%= event.volunteers_needed %></span></p>
+          <div class="mt-2 h-2 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow="<%= event.nb_volunteers %>" aria-valuemin="0" aria-valuemax="<%= event.volunteers_needed %>" aria-label="Bénévoles inscrits"><div class="h-full bg-ink" style="width: <%= pct %>%"></div></div>
+          <% if (user) { %>
+            <form method="post" action="/evenements/<%= event.id %>/benevole" class="mt-4">
+              <%- include('../../partials/csrf') %>
+              <% if (isVolunteer) { %><p class="mb-2 text-[15px] text-success">Vous êtes inscrit·e.</p><button class="btn btn-secondary w-full">Me désinscrire</button>
+              <% } else { %><button class="btn btn-primary w-full">Je me propose comme bénévole</button><% } %>
+            </form>
+          <% } %>
+          <% if (volunteers.length) { %>
+            <ul class="mt-5 space-y-2 border-t border-line pt-4 text-[15px]">
+              <% volunteers.forEach((v) => { %>
+                <li><span class="font-semibold"><%= v.first_name %> <%= v.last_name %></span><br><a class="link-quiet text-ink-2" href="mailto:<%= v.email %>"><%= v.email %></a><% if (v.phone) { %> · <a class="link-quiet tnum text-ink-2" href="tel:<%= v.phone.replace(/\s/g, '') %>"><%= v.phone %></a><% } %></li>
+              <% }) %>
+            </ul>
+          <% } %>
         <% } %>
         <% if (event.material_needs) { %>
-          <div class="mt-5 border-t border-slate-100 pt-4">
-            <p class="flex items-center gap-2 text-sm font-medium"><%- icon('PackageSearch', 'size-4 text-orange-500') %>Matériel recherché</p>
-            <p class="prose-text mt-2 text-sm"><%= event.material_needs %></p>
+          <div class="<%= event.volunteers_needed ? 'mt-6 border-t border-line pt-4' : '' %>">
+            <p class="font-bold">Matériel recherché</p>
+            <p class="prose-text mt-1 text-ink-2"><%= event.material_needs %></p>
           </div>
         <% } %>
       </section>
     <% } %>
-  </div>
+
+    <section>
+      <h2 class="h-block mb-3 border-b border-ink pb-2">Associations impliquées</h2>
+      <ul class="space-y-4">
+        <li>
+          <p class="flex items-center gap-2"><span class="swatch size-3" style="background-color: <%= event.association_color %>"></span><a class="link-quiet font-semibold" href="/associations/<%= event.association_slug %>"><%= event.association_name %></a></p>
+          <p class="meta pl-5">Organisatrice</p>
+        </li>
+        <% participations.forEach((p) => { %>
+          <li>
+            <p class="flex items-center gap-2"><span class="swatch size-3" style="background-color: <%= p.color %>"></span><a class="link-quiet font-semibold" href="/associations/<%= p.slug %>"><%= p.name %></a></p>
+            <p class="meta pl-5"><%= PARTICIPATION_KINDS[p.kind] %></p>
+            <% if (p.message) { %><p class="mt-1 pl-5 text-[15px] text-ink-2">« <%= p.message %> »</p><% } %>
+            <% if (user && (canEdit || myAssociationIds.has(p.association_id))) { %>
+              <form method="post" action="/evenements/participations/<%= p.id %>/supprimer" class="pl-5" data-confirm="Retirer cette association de l'événement ?"><%- include('../../partials/csrf') %><button class="link-quiet text-[14px] text-ink-3">Retirer</button></form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+      <% if (availableAssociations.length) { %>
+        <button type="button" class="btn btn-secondary mt-5 w-full" data-toggle="#participate-form" aria-controls="participate-form" aria-expanded="false">Associer mon association</button>
+        <form id="participate-form" method="post" action="/evenements/<%= event.id %>/participer" class="mt-4 hidden space-y-5 border-l-4 border-ink bg-surface p-4">
+          <%- include('../../partials/csrf') %>
+          <% if (availableAssociations.length > 1) { %>
+            <%- include('../../partials/field', { name: 'association_id', label: 'Au nom de', type: 'select', options: availableAssociations.map((a) => [a.id, a.name]) }) %>
+          <% } else { %>
+            <input type="hidden" name="association_id" value="<%= availableAssociations[0].id %>">
+            <p>Au nom de <strong><%= availableAssociations[0].name %></strong></p>
+          <% } %>
+          <fieldset>
+            <legend class="label">Votre rôle</legend>
+            <div class="space-y-2">
+              <% Object.entries(PARTICIPATION_KINDS).forEach(([v, l], i) => { %>
+                <label class="choice items-center py-2.5"><input type="radio" name="kind" value="<%= v %>" <%= i === 1 ? 'checked' : '' %>><span class="text-[15px]"><%= l %></span></label>
+              <% }) %>
+            </div>
+          </fieldset>
+          <%- include('../../partials/field', { name: 'message', label: 'Message', optional: true, help: 'Par exemple : « on apporte deux barnums ».', attrs: 'maxlength="300"' }) %>
+          <button class="btn btn-primary">Confirmer</button>
+        </form>
+      <% } %>
+    </section>
+  </aside>
 </div>

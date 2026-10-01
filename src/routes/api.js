@@ -1,7 +1,7 @@
 const express = require('express');
 const { CATEGORIES } = require('../lib/constants');
 const { parseParisInput } = require('../lib/time');
-const { contrast } = require('../lib/view-helpers');
+const { tint } = require('../lib/view-helpers');
 
 module.exports = ({ models }) => {
   const router = express.Router();
@@ -30,12 +30,13 @@ module.exports = ({ models }) => {
       start: e.start_at,
       end: e.end_at,
       url: `/evenements/${e.id}`,
-      backgroundColor: e.association_color,
+      backgroundColor: tint(e.association_color),
       borderColor: e.association_color,
-      textColor: contrast(e.association_color),
+      textColor: '#1f1d1a',
       classNames: e.visibility === 'network' ? ['ev-network'] : [],
       extendedProps: {
         association: e.association_name,
+        color: e.association_color,
         location: e.location,
         visibility: e.visibility,
         volunteersNeeded: e.volunteers_needed,

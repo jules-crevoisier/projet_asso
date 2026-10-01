@@ -21,6 +21,7 @@
       return data;
     };
 
+    // Les jours avec plusieurs événements affichent leur nombre (c'est là que naissent les conflits)
     const markBusyDays = (events) => {
       const counts = {};
       events.forEach((ev) => {
@@ -32,8 +33,10 @@
       });
       el.querySelectorAll('.fc-daygrid-day[data-date]').forEach((cell) => {
         const n = counts[cell.dataset.date] || 0;
-        cell.classList.toggle('busy-day', n > 1);
-        cell.title = n > 1 ? `${n} événements ce jour-là` : '';
+        const top = cell.querySelector('.fc-daygrid-day-top');
+        top?.querySelector('.day-count')?.remove();
+        if (canCreate) cell.classList.add('can-create');
+        if (n > 1 && top) top.insertAdjacentHTML('beforeend', `<span class="day-count">${n} év.</span>`);
       });
     };
 
@@ -73,31 +76,31 @@
       },
       eventContent: (arg) => {
         if (arg.view.type.startsWith('list')) return true;
-        const p = arg.event.extendedProps;
-        const lock = p.visibility === 'network' ? '🔒 ' : '';
-        return { html: `<div class="truncate"><span class="opacity-80 tabular-nums">${escapeHtml(arg.timeText)}</span> <span class="font-semibold">${lock}${escapeHtml(arg.event.title)}</span></div>` };
+        return { html: `<div class="truncate"><span class="ev-time">${escapeHtml(arg.timeText)}</span> <span class="font-semibold">${escapeHtml(arg.event.title)}</span></div>` };
       },
       eventDidMount: (arg) => {
         if (!arg.view.type.startsWith('list')) return;
         const p = arg.event.extendedProps;
         const titleCell = arg.el.querySelector('.fc-list-event-title');
-        if (titleCell) titleCell.insertAdjacentHTML('beforeend', `<div class="mt-0.5 text-xs text-slate-500">${escapeHtml(p.association)} · ${escapeHtml(p.location)}</div>`);
+        if (titleCell) titleCell.insertAdjacentHTML('beforeend', `<div class="mt-0.5 text-[14px] text-ink-2">${escapeHtml(p.association)} · ${escapeHtml(p.location)}${p.visibility === 'network' ? ' · réservé aux associations' : ''}</div>`);
       },
       eventMouseEnter: (arg) => {
         if (arg.view.type.startsWith('list') || !tooltip) return;
         const e = arg.event;
         const p = e.extendedProps;
         const time = `${timeFmt.format(e.start)}${e.end ? ` – ${timeFmt.format(e.end)}` : ''}`;
+        const when = `${dayFmt.format(e.start).replace(/^./, (c) => c.toUpperCase())} · ${time}`;
+        const rows = [
+          ['Lieu', p.location],
+          p.partners ? ['Partenaires', `${p.partners} association${p.partners > 1 ? 's' : ''}`] : null,
+          p.volunteersNeeded ? ['Bénévoles', `${p.volunteersNeeded} recherché${p.volunteersNeeded > 1 ? 's' : ''}`] : null,
+          p.visibility === 'network' ? ['Visibilité', 'Réservé aux associations'] : null,
+        ].filter(Boolean);
         tooltip.innerHTML = `
-          <div class="flex items-center gap-2 text-xs text-slate-300"><span class="size-2 rounded-full" style="background:${escapeHtml(e.backgroundColor)}"></span>${escapeHtml(p.association)}</div>
-          <div class="mt-1 font-semibold leading-snug">${escapeHtml(e.title)}</div>
-          <div class="mt-2 space-y-0.5 text-xs text-slate-300">
-            <div class="first-letter:uppercase">${escapeHtml(dayFmt.format(e.start))} · ${escapeHtml(time)}</div>
-            <div>📍 ${escapeHtml(p.location)}</div>
-            ${p.partners ? `<div>🤝 ${p.partners} association(s) partenaire(s)</div>` : ''}
-            ${p.volunteersNeeded ? `<div>🙋 Cherche ${p.volunteersNeeded} bénévole(s)</div>` : ''}
-            ${p.visibility === 'network' ? '<div>🔒 Réservé au réseau</div>' : ''}
-          </div>`;
+          <p class="flex items-center gap-2 text-[13px] font-bold text-ink-2"><span class="inline-block size-2.5 rounded-[2px]" style="background:${escapeHtml(p.color)}"></span>${escapeHtml(p.association)}</p>
+          <p class="mt-1 font-serif text-[18px] font-semibold leading-snug text-ink">${escapeHtml(e.title)}</p>
+          <p class="tnum mt-1 text-[15px] text-ink">${escapeHtml(when)}</p>
+          <dl class="mt-2 space-y-0.5 text-[14px]">${rows.map(([k, v]) => `<div class="flex gap-2"><dt class="w-20 shrink-0 text-ink-3">${escapeHtml(k)}</dt><dd class="text-ink">${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
         tooltip.classList.remove('hidden');
         const r = arg.el.getBoundingClientRect();
         const left = Math.min(window.innerWidth - tooltip.offsetWidth - 12, Math.max(12, r.left));

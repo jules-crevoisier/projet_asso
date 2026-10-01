@@ -1,12 +1,24 @@
-<%- include('_shell-start', { heading: 'Créer votre compte', sub: 'Un compte personnel par bénévole. Vous rejoindrez ensuite votre association.' }) %>
-  <form method="post" action="/inscription" class="space-y-5">
-    <%- include('../../partials/csrf') %>
-    <div class="grid grid-cols-2 gap-4">
-      <%- include('../../partials/field', { name: 'firstName', label: 'Prénom', value: values.firstName, error: errors.firstName, required: true, attrs: 'autocomplete="given-name" autofocus' }) %>
-      <%- include('../../partials/field', { name: 'lastName', label: 'Nom', value: values.lastName, error: errors.lastName, required: true, attrs: 'autocomplete="family-name"' }) %>
-    </div>
-    <%- include('../../partials/field', { name: 'email', label: 'Adresse e-mail', type: 'email', value: values.email, error: errors.email, required: true, attrs: 'autocomplete="email"' }) %>
-    <%- include('../../partials/field', { name: 'password', label: 'Mot de passe', type: 'password', error: errors.password, help: '8 caractères minimum.', required: true, attrs: 'autocomplete="new-password" minlength="8"' }) %>
-    <button class="btn btn-primary w-full py-2.5">Créer mon compte</button>
-  </form>
-<%- include('_shell-end', { footer: 'Déjà inscrit ? <a class="font-semibold text-brand-600 hover:text-brand-700" href="/connexion">Se connecter</a>' }) %>
+<div class="grid gap-12 lg:grid-cols-[28rem_1fr] lg:gap-20">
+  <div>
+    <h1 class="h-page">Créer un compte</h1>
+    <p class="mt-3 text-ink-2">Déjà inscrit ? <a class="link" href="/connexion">Se connecter</a></p>
+    <form method="post" action="/inscription" class="mt-8 space-y-6" novalidate>
+      <%- include('../../partials/csrf') %>
+      <div class="grid gap-6 sm:grid-cols-2">
+        <%- include('../../partials/field', { name: 'firstName', label: 'Prénom', value: values.firstName, error: errors.firstName, required: true, attrs: 'autocomplete="given-name" autofocus' }) %>
+        <%- include('../../partials/field', { name: 'lastName', label: 'Nom', value: values.lastName, error: errors.lastName, required: true, attrs: 'autocomplete="family-name"' }) %>
+      </div>
+      <%- include('../../partials/field', { name: 'email', label: 'Adresse e-mail', help: 'Elle sert à vous connecter. Elle est visible des responsables de vos associations.', type: 'email', value: values.email, error: errors.email, required: true, attrs: 'autocomplete="email" spellcheck="false"' }) %>
+      <%- include('../../partials/field', { name: 'password', label: 'Mot de passe', help: 'Au moins 8 caractères.', type: 'password', error: errors.password, required: true, attrs: 'autocomplete="new-password" minlength="8"' }) %>
+      <button class="btn btn-primary">Créer mon compte</button>
+    </form>
+  </div>
+  <aside class="border-t border-line pt-8 lg:mt-24 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+    <h2 class="h-block">Et ensuite ?</h2>
+    <ol class="mt-4 space-y-4 text-ink-2">
+      <li class="grid grid-cols-[1.75rem_1fr]"><span class="font-serif text-[18px] font-semibold text-ink">1</span><span>Vous cherchez votre association dans l'annuaire et demandez à la rejoindre.</span></li>
+      <li class="grid grid-cols-[1.75rem_1fr]"><span class="font-serif text-[18px] font-semibold text-ink">2</span><span>Un responsable accepte votre demande. Si l'association n'est pas inscrite, vous créez sa fiche.</span></li>
+      <li class="grid grid-cols-[1.75rem_1fr]"><span class="font-serif text-[18px] font-semibold text-ink">3</span><span>Vous publiez vos dates, voyez celles des autres et répondez aux annonces.</span></li>
+    </ol>
+  </aside>
+</div>

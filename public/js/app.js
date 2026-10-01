@@ -4,31 +4,44 @@
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Barre latérale mobile
-    const sidebar = $('[data-sidebar]');
-    const backdrop = $('[data-sidebar-backdrop]');
-    const setSidebar = (open) => {
-      if (!sidebar) return;
-      sidebar.classList.toggle('-translate-x-full', !open);
-      backdrop.classList.toggle('hidden', !open);
-      document.body.classList.toggle('overflow-hidden', open);
+    // Menu mobile
+    const menuToggle = $('[data-menu-toggle]');
+    const mobileMenu = $('#menu-mobile');
+    const setMenu = (open) => {
+      if (!menuToggle) return;
+      mobileMenu.classList.toggle('hidden', !open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+      menuToggle.textContent = open ? 'Fermer' : 'Menu';
     };
-    $$('[data-sidebar-open]').forEach((b) => b.addEventListener('click', () => setSidebar(true)));
-    $$('[data-sidebar-close]').forEach((b) => b.addEventListener('click', () => setSidebar(false)));
-    backdrop?.addEventListener('click', () => setSidebar(false));
+    menuToggle?.addEventListener('click', () => setMenu(mobileMenu.classList.contains('hidden')));
 
     // Menus déroulants
-    const closeMenus = (except) => $$('[data-dropdown-menu]').forEach((m) => { if (m !== except) m.classList.add('hidden'); });
+    const closeMenus = (except) => $$('[data-dropdown]').forEach((dd) => {
+      const menu = $('[data-dropdown-menu]', dd);
+      if (menu === except) return;
+      menu.classList.add('hidden');
+      $('[data-dropdown-toggle]', dd).setAttribute('aria-expanded', 'false');
+    });
     $$('[data-dropdown]').forEach((dd) => {
       const menu = $('[data-dropdown-menu]', dd);
-      $('[data-dropdown-toggle]', dd).addEventListener('click', (e) => {
+      const toggle = $('[data-dropdown-toggle]', dd);
+      toggle.addEventListener('click', (e) => {
         e.stopPropagation();
         closeMenus(menu);
-        menu.classList.toggle('hidden');
+        const open = menu.classList.toggle('hidden') === false;
+        toggle.setAttribute('aria-expanded', String(open));
+        if (open) menu.querySelector('a, button')?.focus();
       });
+      menu.addEventListener('click', (e) => e.stopPropagation());
     });
     document.addEventListener('click', () => closeMenus());
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenus(); setSidebar(false); } });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const openToggle = $$('[data-dropdown-toggle][aria-expanded="true"]')[0];
+      closeMenus();
+      setMenu(false);
+      openToggle?.focus();
+    });
 
     // Confirmation avant les actions destructrices
     $$('form[data-confirm]').forEach((form) => form.addEventListener('submit', (e) => {
@@ -49,8 +62,10 @@
     // Afficher / masquer un bloc
     $$('[data-toggle]').forEach((btn) => btn.addEventListener('click', () => {
       const target = $(btn.dataset.toggle);
-      target?.classList.toggle('hidden');
-      target?.querySelector('input:not([type=hidden]), textarea, select')?.focus();
+      if (!target) return;
+      const open = target.classList.toggle('hidden') === false;
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) target.querySelector('input:not([type=hidden]), textarea, select')?.focus();
     }));
 
     // Copier dans le presse-papiers
@@ -67,11 +82,7 @@
     }));
     $$('[data-select-on-focus]').forEach((i) => i.addEventListener('focus', () => i.select()));
 
-    // Messages flash
+    // Messages : fermés par la personne, jamais automatiquement (WCAG 2.2.1)
     $$('[data-flash] [data-dismiss]').forEach((b) => b.addEventListener('click', () => b.closest('[data-flash]').remove()));
-    $$('[data-flash]').forEach((f) => setTimeout(() => {
-      f.style.transition = 'opacity .4s'; f.style.opacity = '0';
-      setTimeout(() => f.remove(), 400);
-    }, 7000));
   });
 })();

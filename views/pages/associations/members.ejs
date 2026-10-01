@@ -1,41 +1,56 @@
+<p class="mb-4"><a class="link shrink-0 whitespace-nowrap text-[15px]" href="/associations/<%= association.slug %>">Retour à la fiche de <%= association.name %></a></p>
 <%- include('../../partials/page-header', {
-  eyebrow: association.name,
   heading: 'Membres',
-  subtitle: 'Les membres publient au nom de l’association. Les responsables gèrent en plus la fiche et l’équipe.',
-  actions: `<a href="/associations/${association.slug}" class="btn btn-secondary">${icon('ChevronLeft')}Retour à la fiche</a>`,
+  subtitle: 'Les membres publient au nom de l’association. Les responsables gèrent en plus la fiche et les adhésions.',
 }) %>
 
-<div class="card overflow-hidden">
-  <div class="divide-list">
-    <% memberships.forEach((m) => { const base = `/associations/${association.slug}/membres/${m.id}`; %>
-      <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
-        <div class="flex min-w-0 flex-1 items-center gap-3">
-          <%- include('../../partials/avatar', { first: m.first_name, last: m.last_name, size: 'size-10 text-sm' }) %>
-          <div class="min-w-0">
-            <p class="flex flex-wrap items-center gap-2 font-medium">
-              <%= m.first_name %> <%= m.last_name %>
-              <% if (m.status === 'pending') { %><span class="badge badge-amber">Demande en attente</span>
-              <% } else if (m.role === 'admin') { %><span class="badge badge-brand"><%- icon('Crown', 'size-3') %>Responsable</span>
-              <% } else { %><span class="badge badge-slate">Membre</span><% } %>
-            </p>
-            <p class="truncate text-sm text-slate-500"><a class="hover:underline" href="mailto:<%= m.email %>"><%= m.email %></a><%= m.phone ? ` · ${m.phone}` : '' %></p>
-            <% if (m.message && m.status === 'pending') { %><p class="mt-1 text-sm italic text-slate-600">« <%= m.message %> »</p><% } %>
+<% const pendingList = memberships.filter((m) => m.status === 'pending'); const active = memberships.filter((m) => m.status === 'active'); %>
+
+<% if (pendingList.length) { %>
+  <section class="mb-12" aria-labelledby="attente">
+    <h2 id="attente" class="h-section mb-1 border-b border-ink pb-2">En attente <span class="text-accent"><%= pendingList.length %></span></h2>
+    <ul class="rows">
+      <% pendingList.forEach((m) => { const base = `/associations/${association.slug}/membres/${m.id}`; %>
+        <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold"><%= m.first_name %> <%= m.last_name %></p>
+            <p class="meta"><a class="link-quiet" href="mailto:<%= m.email %>"><%= m.email %></a></p>
+            <% if (m.message) { %><p class="mt-1 max-w-prose text-ink-2">« <%= m.message %> »</p><% } %>
           </div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <% if (m.status === 'pending') { %>
+          <div class="flex gap-2">
+            <form method="post" action="<%= base %>/accepter"><%- include('../../partials/csrf') %><button class="btn btn-primary btn-sm">Accepter</button></form>
             <form method="post" action="<%= base %>/retirer"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Refuser</button></form>
-            <form method="post" action="<%= base %>/accepter"><%- include('../../partials/csrf') %><button class="btn btn-primary btn-sm"><%- icon('Check', 'size-3.5') %>Accepter</button></form>
-          <% } else { %>
-            <% if (m.role === 'member') { %>
-              <form method="post" action="<%= base %>/promouvoir"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm"><%- icon('Crown', 'size-3.5') %>Nommer responsable</button></form>
-            <% } else { %>
-              <form method="post" action="<%= base %>/retrograder"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Retirer le rôle</button></form>
-            <% } %>
-            <form method="post" action="<%= base %>/retirer" data-confirm="Retirer <%= m.first_name %> de l'association ?"><%- include('../../partials/csrf') %><button class="btn btn-danger btn-sm"><%- icon('Trash2', 'size-3.5') %></button></form>
-          <% } %>
-        </div>
-      </div>
-    <% }) %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+<% } %>
+
+<section aria-labelledby="actifs">
+  <h2 id="actifs" class="h-section mb-1 border-b border-ink pb-2">Membres actifs <span class="font-sans text-[16px] font-normal text-ink-3"><%= active.length %></span></h2>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[36rem] text-left">
+      <thead><tr class="border-b border-line text-[13px] text-ink-3"><th class="py-2.5 pr-4 font-bold">Nom</th><th class="py-2.5 pr-4 font-bold">Contact</th><th class="py-2.5 pr-4 font-bold">Rôle</th><th class="py-2.5"><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody class="rows">
+        <% active.forEach((m) => { const base = `/associations/${association.slug}/membres/${m.id}`; %>
+          <tr>
+            <td class="py-3 pr-4 font-semibold"><%= m.first_name %> <%= m.last_name %></td>
+            <td class="py-3 pr-4 text-[15px]"><a class="link-quiet" href="mailto:<%= m.email %>"><%= m.email %></a><% if (m.phone) { %><span class="tnum block text-ink-3"><%= m.phone %></span><% } %></td>
+            <td class="py-3 pr-4 text-[15px]"><%= m.role === 'admin' ? 'Responsable' : 'Membre' %></td>
+            <td class="py-3 text-right">
+              <div class="flex justify-end gap-2">
+                <% if (m.role === 'member') { %>
+                  <form method="post" action="<%= base %>/promouvoir"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Nommer responsable</button></form>
+                <% } else { %>
+                  <form method="post" action="<%= base %>/retrograder"><%- include('../../partials/csrf') %><button class="btn btn-secondary btn-sm">Retirer le rôle</button></form>
+                <% } %>
+                <form method="post" action="<%= base %>/retirer" data-confirm="Retirer <%= m.first_name %> de l'association ?"><%- include('../../partials/csrf') %><button class="btn btn-danger btn-sm">Retirer</button></form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
-</div>
+</section>
