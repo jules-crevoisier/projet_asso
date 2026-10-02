@@ -1,14 +1,14 @@
-const lucide = require('lucide-static');
+const ICONS = require('./icons');
 const { fmt, toParisInput, parisDateKey } = require('./time');
 const { CATEGORIES, POST_KINDS, PARTICIPATION_KINDS, COLORS } = require('./constants');
 
 const iconCache = new Map();
 
-/** Icône Lucide en SVG inline : icon('Calendar', 'size-4'). */
+/** Icône en SVG inline : icon('ChevronLeft', 'size-4'). */
 function icon(name, cls = 'size-4') {
   const key = `${name}|${cls}`;
   if (!iconCache.has(key)) {
-    const svg = lucide[name];
+    const svg = ICONS[name];
     if (!svg) throw new Error(`Icône inconnue : ${name}`);
     iconCache.set(key, svg
       .replace(/class="[^"]*"/, `class="${cls} shrink-0" aria-hidden="true"`)

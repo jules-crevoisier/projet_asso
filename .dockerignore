@@ -1,0 +1,17 @@
+# Tout ce qui n'est pas nécessaire à l'image
+node_modules
+data
+public/css/app.css
+test
+docs
+.git
+.github
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Dockerfile
+docker-compose*.yml
+.dockerignore
+README.md

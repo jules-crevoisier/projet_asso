@@ -33,7 +33,7 @@ function createApp({ db = openDatabase(), config = defaultConfig, mailer } = {})
         // FullCalendar injecte ses styles à l'exécution
         'style-src': ["'self'", "'unsafe-inline'"],
         'img-src': ["'self'", 'data:'],
-        'upgrade-insecure-requests': config.isProd ? [] : null,
+        'upgrade-insecure-requests': config.cookieSecure ? [] : null,
       },
     },
   }));
@@ -43,6 +43,16 @@ function createApp({ db = openDatabase(), config = defaultConfig, mailer } = {})
   app.use('/vendor/fullcalendar', express.static(path.join(ROOT, 'node_modules/fullcalendar'), staticOpts));
   app.use('/vendor/fullcalendar-locales', express.static(path.join(ROOT, 'node_modules/@fullcalendar/core/locales'), staticOpts));
   app.use('/vendor/schibsted', express.static(path.join(ROOT, 'node_modules/@fontsource-variable/schibsted-grotesk'), staticOpts));
+
+  // Sonde de santé (Docker / Dokploy) : répond avant les sessions, sans rien écrire
+  app.get('/healthz', (req, res) => {
+    try {
+      db.prepare('SELECT 1').get();
+      res.set('Cache-Control', 'no-store').json({ status: 'ok' });
+    } catch (err) {
+      res.status(503).json({ status: 'error' });
+    }
+  });
 
   app.use(express.urlencoded({ extended: false, limit: '200kb' }));
   app.use(express.json({ limit: '50kb' }));
@@ -54,7 +64,7 @@ function createApp({ db = openDatabase(), config = defaultConfig, mailer } = {})
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    cookie: { httpOnly: true, sameSite: 'lax', secure: config.isProd, maxAge: 1000 * 60 * 60 * 24 * 30 },
+    cookie: { httpOnly: true, sameSite: 'lax', secure: config.cookieSecure, maxAge: 1000 * 60 * 60 * 24 * 30 },
   }));
   // Utilisateur courant, messages flash et variables communes aux vues
   app.use((req, res, next) => {

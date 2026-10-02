@@ -8,6 +8,9 @@ if (isProd && !env.SESSION_SECRET) {
 
 module.exports = {
   isProd,
+  // Cookies « Secure » et passage forcé en HTTPS : activés en production, sauf COOKIE_SECURE=false
+  // (utile pour tester sur http://IP:port avant d'avoir un domaine en HTTPS).
+  cookieSecure: env.COOKIE_SECURE ? env.COOKIE_SECURE === 'true' : isProd,
   port: Number(env.PORT || 3000),
   sessionSecret: env.SESSION_SECRET || 'dev-secret-a-changer',
   baseUrl: env.BASE_URL || '',

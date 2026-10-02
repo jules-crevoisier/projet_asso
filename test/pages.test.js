@@ -26,3 +26,10 @@ test('toutes les pages s’affichent avec les données de démo', async () => {
   }
   assert.equal((await anon.get('/page-inexistante')).status, 404);
 });
+
+test('sonde de santé', async () => {
+  const { app } = setup();
+  const res = await (await client(app)).get('/healthz');
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body, { status: 'ok' });
+});

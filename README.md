@@ -74,18 +74,58 @@ connexion, requêtes SQL paramétrées.
 npm test
 ```
 
-## Mise en production
+## Déploiement sur Dokploy
 
-1. Copier `.env.example` en `.env` et le remplir, au minimum `SESSION_SECRET`, `BASE_URL` et le SMTP.
-2. Lancer :
-   ```bash
-   npm install
-   npm run create-admin -- vous@exemple.fr "Prénom" "Nom"
-   node --env-file=.env server.js
+L'application est livrée avec un `Dockerfile` optimisé et un `docker-compose.yml`.
+L'image fait environ **57 Mo compressés** : Alpine nue avec le binaire Node, sans npm ni outils
+de compilation, utilisateur non-root, système de fichiers compatible lecture seule. La base
+SQLite est le seul état : elle vit dans le volume `/data`.
+
+### Option 1 : Application (recommandée)
+
+1. Dans Dokploy : **Create Service → Application**, source GitHub
+   `jules-crevoisier/projet_asso`, branche à déployer.
+2. **Build Type : Dockerfile** (chemin `Dockerfile`, contexte `.`).
+3. **Environment** : au minimum
    ```
-3. Placer l'application derrière HTTPS (Nginx, Caddy, ou un hébergeur comme Render, Railway,
-   Fly.io ou Alwaysdata) et garder le dossier `data/` sur un disque persistant. C'est la base
-   SQLite : pensez à la sauvegarder.
+   SESSION_SECRET=<openssl rand -hex 32>
+   BASE_URL=https://votre-domaine.fr
+   ADMIN_EMAIL=vous@exemple.fr
+   ADMIN_PASSWORD=un-mot-de-passe-solide
+   ```
+   Ajoutez le SMTP pour les e-mails de mot de passe oublié (voir `.env.example`).
+4. **Advanced → Volumes** : un volume (ou un dossier de l'hôte) monté sur **`/data`**.
+   Sans lui, la base est perdue à chaque redéploiement.
+5. **Domains** : votre domaine, **port 3000**, HTTPS activé (Let's Encrypt).
+6. **Deploy**. Le compte modérateur `ADMIN_EMAIL` est créé au premier démarrage.
+
+### Option 2 : Docker Compose
+
+Créez un service **Compose** pointant sur le dépôt (fichier `docker-compose.yml`), renseignez les
+mêmes variables dans **Environment**, puis ajoutez le domaine dans **Domains** (service `app`,
+port 3000). Le volume `assos-data` est déclaré dans le fichier.
+
+### Bon à savoir
+
+- **Santé** : `GET /healthz` répond `{"status":"ok"}`. L'image déclare un `HEALTHCHECK`, et Dokploy
+  l'utilise pour les déploiements sans coupure.
+- **Arrêt propre** : à chaque redéploiement, le serveur termine les requêtes en cours et ferme la base.
+- **Tester sans domaine** (http://IP:port) : ajoutez `COOKIE_SECURE=false`, sinon la connexion
+  échoue (les cookies sécurisés exigent HTTPS). Retirez cette variable une fois le domaine en place.
+- **Sauvegardes** : `docker exec <conteneur> node scripts/backup.js` écrit une copie à chaud dans
+  `/data/backups` et garde les 14 dernières. À planifier dans Dokploy (**Schedules**) ou via cron.
+- **Créer un autre modérateur** : `docker exec -it <conteneur> node scripts/create-admin.js email@exemple.fr`.
+- **En local** : `SESSION_SECRET=test docker compose up --build`, puis ouvrez le port publié par un
+  fichier `docker-compose.override.yml` (par exemple `ports: ["3000:3000"]`).
+
+### Sans Docker
+
+```bash
+npm ci
+npm run build:css
+npm prune --omit=dev
+node --env-file=.env server.js
+```
 
 ## Organisation du code
 
@@ -101,5 +141,6 @@ npm test
 | `styles/app.css` | Jetons de design et composants Tailwind (voir `docs/design.md`) |
 | `docs/design.md` | Charte de design |
 | `public/js/` | JavaScript navigateur : calendrier, alerte de conflit, menus |
-| `scripts/` | Données de démo, création d'un modérateur |
+| `scripts/` | Données de démo, création d'un modérateur, sauvegarde |
+| `Dockerfile`, `docker-compose.yml` | Image de production et déploiement Dokploy |
 | `test/` | Tests (`node:test` + supertest) |

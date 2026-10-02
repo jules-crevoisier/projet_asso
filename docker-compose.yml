@@ -1,0 +1,44 @@
+# Déploiement Dokploy (type « Docker Compose ») ou local : docker compose up -d --build
+# Sur Dokploy, définissez les variables dans l'onglet « Environment » et le domaine dans « Domains »
+# (service : app, port : 3000). Dokploy ajoute lui-même le routage Traefik et le HTTPS.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: assos-troyes:latest
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DB_PATH: /data/assos.db
+      SESSION_SECRET: ${SESSION_SECRET:?Définissez SESSION_SECRET}
+      BASE_URL: ${BASE_URL:-}
+      PLATFORM_NAME: ${PLATFORM_NAME:-Assos Troyes}
+      PLATFORM_CITY: ${PLATFORM_CITY:-Troyes}
+      ASSOCIATIONS_REQUIRE_VALIDATION: ${ASSOCIATIONS_REQUIRE_VALIDATION:-true}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-Assos Troyes <noreply@assos-troyes.fr>}
+    volumes:
+      - assos-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+volumes:
+  assos-data:
