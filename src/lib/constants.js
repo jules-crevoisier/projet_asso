@@ -27,28 +27,31 @@ const POST_KINDS = {
   other: 'Autre',
 };
 
-// Couleurs des associations : teintes terreuses, toutes lisibles avec du texte blanc (≥ 4,5:1).
-// Voir docs/design.md.
+// Couleurs des associations : teintes claires de même intensité, toujours avec du texte noir
+// (contraste ≥ 9:1), lisibles en mode clair comme en mode sombre. Voir docs/design.md.
 const COLORS = [
-  '#b4532a', // brique
-  '#94691c', // ocre
-  '#557548', // sauge
-  '#2f6b4f', // forêt
-  '#2b6f77', // canard
-  '#4a6a8c', // ardoise
-  '#34478a', // outremer
-  '#7a4a7a', // prune
-  '#a8445e', // framboise
-  '#7b5b3e', // terre
-  '#66682c', // olive
-  '#5f5f5a', // gris
+  '#8fd6cf', // menthe
+  '#c9b3f0', // lilas
+  '#9cc9f5', // ciel
+  '#f2afc1', // rose
+  '#a9d99a', // vert
+  '#e8d77a', // moutarde
+  '#f5c3a0', // pêche
+  '#b7c4f2', // pervenche
+  '#cfe38a', // anis
+  '#e3b7e8', // orchidée
+  '#d9c7a7', // sable
+  '#bcc7cf', // ardoise
 ];
 
-// Anciennes couleurs (première version) → nouvelles, pour migrer les bases existantes
+// Couleurs des versions précédentes → nouvelles, pour migrer les bases existantes
 const LEGACY_COLORS = {
-  '#6366f1': '#34478a', '#8b5cf6': '#7a4a7a', '#ec4899': '#a8445e', '#ef4444': '#b4532a',
-  '#f97316': '#b4532a', '#f59e0b': '#94691c', '#84cc16': '#66682c', '#10b981': '#2f6b4f',
-  '#14b8a6': '#2b6f77', '#06b6d4': '#2b6f77', '#3b82f6': '#4a6a8c', '#64748b': '#5f5f5a',
+  '#6366f1': '#b7c4f2', '#8b5cf6': '#c9b3f0', '#ec4899': '#f2afc1', '#ef4444': '#f5c3a0',
+  '#f97316': '#f5c3a0', '#f59e0b': '#e8d77a', '#84cc16': '#cfe38a', '#10b981': '#8fd6cf',
+  '#14b8a6': '#8fd6cf', '#06b6d4': '#9cc9f5', '#3b82f6': '#9cc9f5', '#64748b': '#bcc7cf',
+  '#b4532a': '#f5c3a0', '#94691c': '#e8d77a', '#557548': '#a9d99a', '#2f6b4f': '#8fd6cf',
+  '#2b6f77': '#9cc9f5', '#4a6a8c': '#bcc7cf', '#34478a': '#b7c4f2', '#7a4a7a': '#c9b3f0',
+  '#a8445e': '#f2afc1', '#7b5b3e': '#d9c7a7', '#66682c': '#cfe38a', '#5f5f5a': '#bcc7cf',
 };
 
 module.exports = { CATEGORIES, PARTICIPATION_KINDS, POST_KINDS, COLORS, LEGACY_COLORS };

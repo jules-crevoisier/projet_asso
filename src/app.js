@@ -42,8 +42,7 @@ function createApp({ db = openDatabase(), config = defaultConfig, mailer } = {})
   app.use('/static', express.static(path.join(ROOT, 'public'), staticOpts));
   app.use('/vendor/fullcalendar', express.static(path.join(ROOT, 'node_modules/fullcalendar'), staticOpts));
   app.use('/vendor/fullcalendar-locales', express.static(path.join(ROOT, 'node_modules/@fullcalendar/core/locales'), staticOpts));
-  app.use('/vendor/atkinson', express.static(path.join(ROOT, 'node_modules/@fontsource-variable/atkinson-hyperlegible-next'), staticOpts));
-  app.use('/vendor/newsreader', express.static(path.join(ROOT, 'node_modules/@fontsource-variable/newsreader'), staticOpts));
+  app.use('/vendor/schibsted', express.static(path.join(ROOT, 'node_modules/@fontsource-variable/schibsted-grotesk'), staticOpts));
 
   app.use(express.urlencoded({ extended: false, limit: '200kb' }));
   app.use(express.json({ limit: '50kb' }));

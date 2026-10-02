@@ -1,0 +1,28 @@
+<% const f = { association: filters.association, theme: filters.theme, mes: filters.mes }; %>
+<div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+  <div>
+    <p class="kicker mb-3">Semaine <%= weekNumber %> · du <%= fmt.dayHeading(weekStart + 'T12:00:00Z').replace(/^\S+ /, '') %> au <%= fmt.dayHeading(weekEnd + 'T12:00:00Z').replace(/^\S+ /, '') %></p>
+    <h1 class="h-page">Agenda</h1>
+  </div>
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="<%= user ? '/profil#agenda' : '/evenements/ical/public.ics' %>" class="btn btn-secondary">Ajouter à mon agenda</a>
+    <% if (user) { %><a href="/evenements/nouveau" class="btn btn-primary">Publier une date</a><% } %>
+  </div>
+</div>
+
+<div class="space-y-3 border-t-2 border-ink py-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="/evenements<%= query(f, { semaine: prevWeek }) %>" class="btn btn-secondary btn-icon" aria-label="Semaine précédente"><%- icon('ChevronLeft') %></a>
+      <a href="/evenements<%= query(f, {}) %>" class="btn btn-secondary <%= isCurrentWeek ? 'pointer-events-none text-ink-3' : '' %>">Cette semaine</a>
+      <a href="/evenements<%= query(f, { semaine: nextWeek }) %>" class="btn btn-secondary btn-icon" aria-label="Semaine suivante"><%- icon('ChevronRight') %></a>
+      <p class="ml-2 text-[15px] text-ink-2"><%= plural(weekEvents, 'événement') %><% if (planning.conflictCount) { %> · <span class="font-semibold text-accent"><%= plural(planning.conflictCount, 'conflit') %></span><% } %></p>
+    </div>
+    <%- include('../../partials/agenda-views', { current: 'semaine' }) %>
+  </div>
+  <%- include('../../partials/agenda-filters', { hidden: isCurrentWeek ? [] : [['semaine', weekStart]] }) %>
+</div>
+
+<%- include('../../partials/planning', { planning, list: weekList, canCreate: Boolean(user) }) %>
+<% if (!weekEvents) { %><p class="mt-6 text-ink-2">Aucune date publiée cette semaine<%= filters.association || filters.theme || filters.mes ? ' avec ces filtres' : '' %>.<% if (user) { %> <a class="link" href="/evenements/nouveau">Publier la première</a><% } %></p><% } %>
+<p class="meta mt-4 hidden md:block">Les blocs hachurés sont réservés aux associations connectées.<% if (user) { %> Survolez un jour vide pour y publier une date.<% } %></p>

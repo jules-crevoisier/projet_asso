@@ -49,6 +49,10 @@ function groupByDay(events) {
     if (!groups.has(key)) groups.set(key, { key, date: e.start_at, events: [] });
     groups.get(key).events.push(e);
   }
+  // Un conflit = deux événements du même jour dont les horaires se recouvrent
+  for (const g of groups.values()) {
+    g.conflict = g.events.some((a, i) => g.events.slice(i + 1).some((b) => a.start_at < b.end_at && b.start_at < a.end_at));
+  }
   return [...groups.values()];
 }
 

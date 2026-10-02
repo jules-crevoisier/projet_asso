@@ -1,12 +1,15 @@
-<article class="group relative px-5 py-4">
-  <p class="kicker"><%= POST_KINDS[post.kind] || POST_KINDS.other %><% if (post.is_closed) { %> · <span class="text-success">Résolue</span><% } %></p>
-  <h3 class="mt-1 font-sans text-[16px] font-bold leading-snug">
-    <a href="/annonces/<%= post.id %>" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[3px]"><%= post.title %></a>
-  </h3>
-  <% if (locals.excerpt) { %><p class="mt-1 line-clamp-2 max-w-prose text-[15px] text-ink-2"><%= post.body %></p><% } %>
-  <p class="meta mt-1.5 flex flex-wrap items-center gap-x-2">
-    <span class="inline-flex items-center gap-1.5"><span class="swatch" style="background-color: <%= post.association_color %>"></span><%= post.association_name %></span>
-    <span aria-hidden="true">·</span><span><%= fmt.ago(post.created_at) %></span>
-    <% if (post.nb_replies) { %><span aria-hidden="true">·</span><span><%= plural(post.nb_replies, 'réponse') %></span><% } %>
-  </p>
+<% const verb = { lend: 'Prête', borrow: 'Cherche', volunteers: 'Cherche', space: 'Prête', partnership: 'Propose', info: 'Info', other: 'Autre' }[post.kind] || 'Autre'; %>
+<article class="group relative grid gap-x-4 gap-y-1 py-4 <%= locals.compact ? '' : 'sm:grid-cols-[6.5rem_minmax(0,1fr)_13rem_6.5rem]' %> sm:items-baseline">
+  <span class="text-[14px] text-ink-2"><%= locals.compact ? (POST_KINDS[post.kind] || POST_KINDS.other) : verb %><% if (post.is_closed) { %> · <span class="text-success">résolue</span><% } %></span>
+  <div class="min-w-0">
+    <h3 class="text-[17px] font-semibold leading-snug">
+      <a href="/annonces/<%= post.id %>" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[3px]"><%= post.title %></a>
+    </h3>
+    <% if (locals.excerpt) { %><p class="mt-1 line-clamp-2 max-w-prose text-[15px] text-ink-2"><%= post.body %></p><% } %>
+    <% if (locals.compact) { %><p class="meta mt-0.5"><%= post.association_name %> · <%= fmt.ago(post.created_at) %></p><% } %>
+  </div>
+  <% if (!locals.compact) { %>
+    <span class="flex items-center gap-2 text-[14px]"><span class="swatch" style="background-color: <%= post.association_color %>"></span><span class="truncate"><%= post.association_name %></span></span>
+    <span class="text-[14px] text-ink-2 sm:text-right"><%= fmt.ago(post.created_at).replace('il y a ', '') %><% if (post.nb_replies) { %> · <%= post.nb_replies %> rép.<% } %></span>
+  <% } %>
 </article>

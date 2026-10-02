@@ -1,12 +1,12 @@
 const express = require('express');
 const { requireAuth } = require('../lib/http');
-const { parseParisInput, parisDateKey } = require('../lib/time');
+const { weekStartKey, addDays, parisMidnight, isoWeek } = require('../lib/time');
+const { buildPlanning } = require('../lib/planning');
 
-/** Minuit (heure de Paris) dans n jours, en ISO UTC. */
-function startOfDay(days) {
-  const d = new Date(`${parisDateKey()}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return parseParisInput(`${d.toISOString().slice(0, 10)}T00:00`).toISOString();
+function currentWeek(models, user) {
+  const start = weekStartKey();
+  const events = models.events.list({ user, from: parisMidnight(start), to: parisMidnight(addDays(start, 7)) }, { limit: 500 });
+  return { planning: buildPlanning(events, start), weekList: events, weekStart: start, weekEnd: addDays(start, 6), weekNumber: isoWeek(start), weekEvents: events.length };
 }
 
 module.exports = ({ models }) => {
@@ -16,7 +16,7 @@ module.exports = ({ models }) => {
     if (req.user) return res.redirect('/tableau-de-bord');
     return res.page('home', {
       title: 'Accueil',
-      events: models.events.list({ past: false }, { limit: 7 }),
+      ...currentWeek(models, null),
       stats: {
         associations: models.associations.countValidated(),
         events: models.events.countUpcoming(),
@@ -32,7 +32,7 @@ module.exports = ({ models }) => {
       myAssociations: mine,
       myEvents: mine.length ? models.events.list({ user, mine: true, past: false }, { limit: 6 }) : [],
       upcoming: models.events.list({ user, past: false }, { limit: 6 }),
-      week: models.events.list({ user, from: startOfDay(0), to: startOfDay(7) }, { limit: 300 }),
+      ...currentWeek(models, user),
       posts: models.posts.list({ limit: 5 }),
       pending: models.memberships.pendingForAdmin(user.id),
       myPending: models.memberships.forUser(user.id).filter((m) => m.status === 'pending'),

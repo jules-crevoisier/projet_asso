@@ -21,7 +21,7 @@
   </div>
   <dl class="mt-8 grid gap-6 sm:grid-cols-2 lg:max-w-3xl">
     <div><dt class="meta">Quand</dt><dd class="tnum mt-0.5 text-[20px] first-letter:uppercase"><%= fmt.range(event.start_at, event.end_at) %></dd></div>
-    <div><dt class="meta">Où</dt><dd class="mt-0.5 font-serif text-[20px]"><%= event.location %></dd></div>
+    <div><dt class="meta">Où</dt><dd class="mt-0.5 text-[20px]"><%= event.location %></dd></div>
   </dl>
 </header>
 
@@ -29,7 +29,7 @@
   <div class="notice notice-warn mb-10 flex-col gap-1">
     <p class="font-bold">Sur le même créneau</p>
     <ul class="space-y-0.5">
-      <% conflicts.forEach((c) => { %><li><span class="swatch mr-1.5" style="background-color: <%= c.association_color %>"></span><a class="link-quiet font-semibold" href="/evenements/<%= c.id %>"><%= c.title %></a>, <%= c.association_name %>, <span class="tnum"><%= fmt.time(c.start_at) %>–<%= fmt.time(c.end_at) %></span>, <%= c.location %></li><% }) %>
+      <% conflicts.forEach((c) => { %><li><span class="swatch mr-1.5" style="background-color: <%= c.association_color %>"></span><a class="link-quiet font-semibold" href="/evenements/<%= c.id %>"><%= c.title %></a>, <%= c.association_name %>, <span class="tnum"><%= fmt.hourRange(c.start_at, c.end_at) %></span>, <%= c.location %></li><% }) %>
     </ul>
   </div>
 <% } %>
@@ -42,7 +42,7 @@
 
     <% if (user) { %>
       <section id="discussion" aria-labelledby="discussion-titre">
-        <h2 id="discussion-titre" class="h-section mb-1 border-b border-ink pb-2">Discussion <span class="font-sans text-[16px] font-normal text-ink-3"><%= comments.length %></span></h2>
+        <h2 id="discussion-titre" class="h-section mb-1 border-t-2 border-ink pt-3.5 pb-3">Discussion <span class="text-[16px] font-normal text-ink-3"><%= comments.length %></span></h2>
         <p class="meta mb-4">Visible par les membres connectés : questions, propositions d'aide, organisation.</p>
         <ol class="rows">
           <% comments.forEach((c) => { %>
@@ -73,7 +73,7 @@
   <aside class="space-y-10">
     <% if (event.volunteers_needed || event.material_needs) { %>
       <section>
-        <h2 class="h-block mb-3 border-b border-ink pb-2">Besoins</h2>
+        <h2 class="h-section mb-0 border-t-2 border-ink pt-3.5 pb-3">Besoins</h2>
         <% if (event.volunteers_needed) { const pct = Math.min(100, Math.round(event.nb_volunteers / event.volunteers_needed * 100)); %>
           <p class="flex items-baseline justify-between"><span class="font-bold">Bénévoles</span><span class="tnum text-ink-2"><strong class="text-ink"><%= event.nb_volunteers %></strong> sur <%= event.volunteers_needed %></span></p>
           <div class="mt-2 h-2 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow="<%= event.nb_volunteers %>" aria-valuemin="0" aria-valuemax="<%= event.volunteers_needed %>" aria-label="Bénévoles inscrits"><div class="h-full bg-ink" style="width: <%= pct %>%"></div></div>
@@ -102,7 +102,7 @@
     <% } %>
 
     <section>
-      <h2 class="h-block mb-3 border-b border-ink pb-2">Associations impliquées</h2>
+      <h2 class="h-section mb-0 border-t-2 border-ink pt-3.5 pb-3">Associations impliquées</h2>
       <ul class="space-y-4">
         <li>
           <p class="flex items-center gap-2"><span class="swatch size-3" style="background-color: <%= event.association_color %>"></span><a class="link-quiet font-semibold" href="/associations/<%= event.association_slug %>"><%= event.association_name %></a></p>

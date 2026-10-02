@@ -54,6 +54,11 @@ const fmt = {
   day: (v) => format(v, { day: 'numeric' }),
   monthShort: (v) => format(v, { month: 'short' }).replace('.', ''),
   time: (v) => format(v, { hour: '2-digit', minute: '2-digit' }),
+  /** Heure à la française : « 15 h », « 15 h 30 ». */
+  hour: (v) => {
+    const p = parisParts(new Date(v));
+    return p.minute ? `${p.hour}\u00a0h\u00a0${String(p.minute).padStart(2, '0')}` : `${p.hour}\u00a0h`;
+  },
   date: (v) => format(v, { weekday: 'long', day: 'numeric', month: 'long' }),
   weekdayShort: (v) => format(v, { weekday: 'short' }).replace('.', ''),
   dayHeading: (v) => {
@@ -66,9 +71,10 @@ const fmt = {
   full: (v) => format(v, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),
   sameDay: (a, b) => parisDateKey(a) === parisDateKey(b),
   range(start, end) {
-    if (fmt.sameDay(start, end)) return `${fmt.dateYear(start)} · ${fmt.time(start)} – ${fmt.time(end)}`;
-    return `${fmt.full(start)} → ${fmt.full(end)}`;
+    if (fmt.sameDay(start, end)) return `${fmt.dateYear(start)}, ${fmt.hour(start)} – ${fmt.hour(end)}`;
+    return `${fmt.date(start)}, ${fmt.hour(start)} → ${fmt.date(end)}, ${fmt.hour(end)}`;
   },
+  hourRange: (start, end) => `${fmt.hour(start)}\u00a0– ${fmt.hour(end)}`,
   ago(value) {
     const s = Math.round((Date.now() - new Date(value).getTime()) / 1000);
     const rtf = new Intl.RelativeTimeFormat('fr', { numeric: 'auto' });
@@ -80,4 +86,31 @@ const fmt = {
   },
 };
 
-module.exports = { TZ, parseParisInput, toParisInput, parisDateKey, fmt };
+/** Lundi (AAAA-MM-JJ) de la semaine contenant le jour donné. */
+function weekStartKey(dateKey = parisDateKey()) {
+  const d = new Date(`${dateKey}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/** Décale un jour AAAA-MM-JJ de n jours. */
+function addDays(dateKey, n) {
+  const d = new Date(`${dateKey}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Minuit (heure de Paris) du jour donné, en ISO UTC. */
+const parisMidnight = (dateKey) => parseParisInput(`${dateKey}T00:00`).toISOString();
+
+/** Numéro de semaine ISO 8601. */
+function isoWeek(dateKey) {
+  const d = new Date(`${dateKey}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 3 - ((d.getUTCDay() + 6) % 7));
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+}
+
+module.exports = {
+  TZ, parseParisInput, toParisInput, parisDateKey, parisParts, fmt, weekStartKey, addDays, parisMidnight, isoWeek,
+};

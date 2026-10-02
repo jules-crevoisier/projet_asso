@@ -27,7 +27,7 @@
 
   <div>
     <% if (posts.length) { %>
-      <div class="rows -mx-5 border-y border-line"><% posts.forEach((post) => { %><%- include('../../partials/post-row', { post, excerpt: true }) %><% }) %></div>
+      <div class="rows border-y border-line"><% posts.forEach((post) => { %><%- include('../../partials/post-row', { post, excerpt: true }) %><% }) %></div>
     <% } else { %>
       <div class="panel"><%- include('../../partials/empty', { heading: 'Aucune annonce', text: q || kind ? 'Rien ne correspond à ces critères.' : 'Besoin de bras, d’une sono ou d’une salle ? Demandez aux autres associations.', actionHref: '/annonces/nouvelle', actionLabel: 'Publier une annonce' }) %></div>
     <% } %>

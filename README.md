@@ -5,7 +5,7 @@ annuaire, **calendrier partagé**, co-organisation d'événements et annonces d'
 
 **Stack** : Node.js (Express 5) · EJS · Tailwind CSS 4 · SQLite (better-sqlite3) · FullCalendar
 
-Les règles de design (typographie, couleurs, accessibilité, ce qu'on s'interdit) et leurs
+Les règles de design (le planning, la typographie, les couleurs, le mode sombre) et leurs
 sources sont dans [`docs/design.md`](docs/design.md).
 
 ## Démarrer

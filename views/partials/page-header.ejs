@@ -1,8 +1,8 @@
-<div class="mb-10 flex flex-col gap-5 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+<div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
   <div class="min-w-0">
-    <% if (locals.kicker) { %><p class="kicker mb-2"><%= kicker %></p><% } %>
+    <% if (locals.kicker) { %><p class="kicker mb-3"><%= kicker %></p><% } %>
     <h1 class="h-page"><%= heading %></h1>
-    <% if (locals.subtitle) { %><p class="mt-3 max-w-prose text-[17px] text-ink-2"><%= subtitle %></p><% } %>
+    <% if (locals.subtitle) { %><p class="mt-4 max-w-prose text-[18px] leading-relaxed text-ink-2"><%= subtitle %></p><% } %>
   </div>
   <% if (locals.actions) { %><div class="flex shrink-0 flex-wrap items-center gap-2"><%- actions %></div><% } %>
 </div>

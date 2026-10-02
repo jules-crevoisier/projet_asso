@@ -1,0 +1,52 @@
+<%
+  // Planning de la semaine. Paramètres : planning (buildPlanning), list (événements, pour le mobile), canCreate
+  const step = 200 / (planning.maxHour - planning.minHour);
+  const LANE = 64;
+%>
+<div class="hidden md:block">
+  <div class="grid grid-cols-[9rem_1fr] border-b border-line">
+    <div></div>
+    <div class="relative h-8 text-[13px] font-medium text-ink-2">
+      <% planning.hours.forEach((h, i) => { %>
+        <span class="absolute bottom-2 whitespace-nowrap <%= h.left === 100 ? '-translate-x-full' : '' %>" style="left: <%= h.left %>%"><%= h.label %></span>
+      <% }) %>
+    </div>
+  </div>
+  <% planning.days.forEach((day, di) => { const height = Math.max(72, day.lanes * LANE + 8); const isToday = day.key === planning.today; %>
+    <div class="grid grid-cols-[9rem_1fr] <%= di === planning.days.length - 1 ? 'border-b-2 border-ink' : 'border-b border-line' %>">
+      <div class="flex flex-col justify-center gap-1.5 py-2 pr-3">
+        <p class="flex items-center gap-2.5">
+          <span class="grid h-9 min-w-9 place-items-center rounded-[3px] px-1 text-[26px] font-bold tracking-[-0.03em] <%= isToday ? 'bg-ink text-paper' : '' %>"><%= day.number %></span>
+          <span class="text-[15px] text-ink-2"><%= day.name %></span>
+        </p>
+        <% if (day.conflicts.length) { %>
+          <p class="flex flex-wrap items-center gap-1.5 text-[13px]"><span class="tag tag-signal">Conflit</span><span class="text-ink-2"><%= day.conflicts.map((c) => c.label).join(', ') %></span></p>
+        <% } %>
+      </div>
+      <div class="relative" style="height: <%= height %>px; background-image: linear-gradient(90deg, var(--c-grid) 1px, transparent 1px); background-size: <%= step %>% 100%">
+        <% day.conflicts.forEach((c) => { %>
+          <div class="absolute inset-y-0 border-x-2 border-signal" style="left: <%= c.left %>%; width: <%= c.width %>%; background: color-mix(in srgb, var(--c-signal) 16%, transparent)" aria-hidden="true"></div>
+        <% }) %>
+        <% day.items.forEach((it) => { const e = it.event; %>
+          <a href="/evenements/<%= e.id %>" class="ev-block <%= e.visibility === 'network' ? 'bg-[repeating-linear-gradient(-45deg,transparent_0_6px,rgba(17,17,17,.08)_6px_7px)]' : '' %>"
+             style="left: calc(<%= it.left %>% + 2px); width: calc(<%= it.width %>% - 4px); top: <%= 8 + it.lane * LANE %>px; height: <%= LANE - 8 %>px; background-color: <%= e.association_color %>"
+             title="<%= e.title %> — <%= e.association_name %>, <%= it.label %>, <%= e.location %>">
+            <span class="truncate text-[14px] font-bold"><%= e.title %></span>
+            <span class="truncate text-[12px]"><%= e.association_name %> · <%= it.label %></span>
+          </a>
+        <% }) %>
+        <% if (locals.canCreate && !day.items.length) { %>
+          <a href="/evenements/nouveau?date=<%= day.key %>" class="absolute inset-0 flex items-center pl-4 text-[14px] text-ink-3 opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100">Publier une date le <%= day.number %></a>
+        <% } %>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<div class="md:hidden">
+  <% if (list.length) { %>
+    <%- include('agenda', { events: list }) %>
+  <% } else { %>
+    <p class="border-t-2 border-ink py-6 text-ink-2">Aucune date publiée cette semaine.</p>
+  <% } %>
+</div>

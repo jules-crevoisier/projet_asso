@@ -19,7 +19,7 @@
     </article>
 
     <section id="reponses" aria-labelledby="reponses-titre" class="pt-10">
-      <h2 id="reponses-titre" class="h-section mb-1 border-b border-ink pb-2">Réponses <span class="font-sans text-[16px] font-normal text-ink-3"><%= replies.length %></span></h2>
+      <h2 id="reponses-titre" class="h-section mb-1 border-t-2 border-ink pt-3.5 pb-3">Réponses <span class="text-[16px] font-normal text-ink-3"><%= replies.length %></span></h2>
       <% if (replies.length) { %>
         <ol class="rows">
           <% replies.forEach((r) => { %>
@@ -59,7 +59,7 @@
   </div>
 
   <aside>
-    <h2 class="h-block mb-3 border-b border-ink pb-2">Contact</h2>
+    <h2 class="h-section mb-0 border-t-2 border-ink pt-3.5 pb-3">Contact</h2>
     <dl class="space-y-3">
       <div><dt class="meta">Association</dt><dd class="flex items-center gap-2"><span class="swatch size-3" style="background-color: <%= post.association_color %>"></span><a class="link-quiet font-semibold" href="/associations/<%= post.association_slug %>"><%= post.association_name %></a></dd></div>
       <% if (post.author_email) { %><div><dt class="meta">E-mail</dt><dd><a class="link break-all" href="mailto:<%= post.author_email %>?subject=<%= encodeURIComponent(post.title) %>"><%= post.author_email %></a></dd></div><% } %>

@@ -8,7 +8,7 @@
 
 <% if (pendingList.length) { %>
   <section class="mb-12" aria-labelledby="attente">
-    <h2 id="attente" class="h-section mb-1 border-b border-ink pb-2">En attente <span class="text-accent"><%= pendingList.length %></span></h2>
+    <h2 id="attente" class="h-section mb-1 border-t-2 border-ink pt-3.5 pb-3">En attente <span class="text-accent"><%= pendingList.length %></span></h2>
     <ul class="rows">
       <% pendingList.forEach((m) => { const base = `/associations/${association.slug}/membres/${m.id}`; %>
         <li class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center">
@@ -28,7 +28,7 @@
 <% } %>
 
 <section aria-labelledby="actifs">
-  <h2 id="actifs" class="h-section mb-1 border-b border-ink pb-2">Membres actifs <span class="font-sans text-[16px] font-normal text-ink-3"><%= active.length %></span></h2>
+  <h2 id="actifs" class="h-section mb-1 border-t-2 border-ink pt-3.5 pb-3">Membres actifs <span class="text-[16px] font-normal text-ink-3"><%= active.length %></span></h2>
   <div class="overflow-x-auto">
     <table class="w-full min-w-[36rem] text-left">
       <thead><tr class="border-b border-line text-[13px] text-ink-3"><th class="py-2.5 pr-4 font-bold">Nom</th><th class="py-2.5 pr-4 font-bold">Contact</th><th class="py-2.5 pr-4 font-bold">Rôle</th><th class="py-2.5"><span class="sr-only">Actions</span></th></tr></thead>

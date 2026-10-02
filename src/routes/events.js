@@ -2,7 +2,8 @@ const express = require('express');
 const { requireAuth, forbidden, notFound } = require('../lib/http');
 const { str, int, FormErrors } = require('../lib/forms');
 const { CATEGORIES, PARTICIPATION_KINDS } = require('../lib/constants');
-const { parseParisInput, toParisInput } = require('../lib/time');
+const { parseParisInput, toParisInput, weekStartKey, addDays, parisMidnight, isoWeek, parisDateKey } = require('../lib/time');
+const { buildPlanning } = require('../lib/planning');
 const { buildCalendar } = require('../lib/ical');
 
 module.exports = ({ models, perms, config }) => {
@@ -56,10 +57,34 @@ module.exports = ({ models, perms, config }) => {
     res.send(buildCalendar(events, { name, baseUrl: baseUrl(req), host: req.hostname }));
   };
 
-  // ----- Calendrier & liste -----
+  // ----- Planning de la semaine (vue principale), mois et liste -----
   router.get('/', (req, res) => {
+    const filters = readFilters(req);
+    const asked = /^\d{4}-\d{2}-\d{2}$/.test(req.query.semaine || '') ? req.query.semaine : parisDateKey();
+    const start = weekStartKey(asked);
+    const events = models.events.list({
+      user: req.user, associationSlug: filters.association, category: filters.theme, mine: Boolean(filters.mes),
+      from: parisMidnight(start), to: parisMidnight(addDays(start, 7)),
+    }, { limit: 500 });
+    res.page('events/week', {
+      title: 'Agenda',
+      filters,
+      associations: models.associations.simpleList(),
+      planning: buildPlanning(events, start),
+      weekStart: start,
+      weekEnd: addDays(start, 6),
+      weekNumber: isoWeek(start),
+      prevWeek: addDays(start, -7),
+      nextWeek: addDays(start, 7),
+      isCurrentWeek: start === weekStartKey(),
+      weekEvents: events.length,
+      weekList: events,
+    });
+  });
+
+  router.get('/mois', (req, res) => {
     res.page('events/calendar', {
-      title: 'Calendrier partagé',
+      title: 'Agenda du mois',
       scripts: ['/vendor/fullcalendar/index.global.min.js', '/vendor/fullcalendar-locales/fr.global.min.js', '/static/js/calendar.js'],
       filters: readFilters(req),
       associations: models.associations.simpleList(),

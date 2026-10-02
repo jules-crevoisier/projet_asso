@@ -1,71 +1,47 @@
-<section class="grid gap-12 border-b border-line pb-14 lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:pb-20">
-  <div class="lg:pt-4">
-    <p class="kicker"><%= city %> · <%= plural(stats.associations, 'association inscrite', 'associations inscrites') %></p>
-    <h1 class="mt-4 max-w-[13ch] font-serif text-[44px] leading-[1.02] font-medium tracking-[-0.025em] sm:text-[60px]">L'agenda commun des associations de <%= city %></h1>
-    <p class="lead mt-6">Publiez vos dates au même endroit que les autres associations. Vous voyez tout de suite si le créneau est déjà pris, et vous pouvez demander un coup de main : bénévoles, matériel, salle.</p>
-    <div class="mt-8 flex flex-wrap gap-3">
+<section class="grid gap-10 pb-14 pt-2 lg:grid-cols-[7fr_4fr] lg:items-end lg:gap-14 lg:pt-6">
+  <div>
+    <p class="kicker mb-6">Semaine <%= weekNumber %> · <%= city %></p>
+    <h1 class="h-display max-w-[13ch]">L'agenda commun des associations de <%= city %></h1>
+  </div>
+  <div class="space-y-7 lg:pb-2">
+    <p class="text-[19px] leading-relaxed">Chaque association publie ses dates au même endroit. Avant de valider la vôtre, vous voyez qui occupe déjà le créneau.</p>
+    <div class="flex flex-wrap gap-2">
       <a href="/inscription" class="btn btn-primary">Inscrire mon association</a>
-      <a href="/evenements" class="btn btn-secondary">Consulter l'agenda</a>
-    </div>
-    <p class="meta mt-4 max-w-prose">Gratuit. Chaque bénévole a son compte, et les responsables choisissent qui publie au nom de l'association.</p>
-  </div>
-
-  <div class="panel self-start">
-    <div class="panel-head">
-      <h2 class="h-block">Prochainement à <%= city %></h2>
-      <a href="/evenements" class="link shrink-0 whitespace-nowrap text-[15px]">Tout l'agenda</a>
-    </div>
-    <% if (events.length) { %>
-      <div class="pb-3"><%- include('../partials/agenda', { events, compact: true }) %></div>
-    <% } else { %>
-      <%- include('../partials/empty', { heading: 'Aucun événement public pour l’instant', text: 'Les dates publiées par les associations apparaîtront ici.' }) %>
-    <% } %>
-  </div>
-</section>
-
-<section class="grid gap-10 border-b border-line py-14 lg:grid-cols-[1fr_2fr] lg:gap-16 lg:py-20">
-  <div>
-    <h2 class="h-section max-w-[16ch]">Deux associations, le même samedi&nbsp;?</h2>
-    <p class="mt-4 max-w-prose text-ink-2">C'est le problème de départ. Quand vous saisissez la date d'un événement, la plateforme cherche ce qui est déjà prévu sur ce créneau et vous le montre avant de publier.</p>
-  </div>
-  <div>
-    <p class="kicker mb-3">Ce que vous voyez en saisissant la date</p>
-    <div class="panel p-5 sm:p-6">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div><span class="label">Début</span><div class="input tnum flex items-center text-ink">samedi 10 oct. · 14:00</div></div>
-        <div><span class="label">Fin</span><div class="input tnum flex items-center text-ink">samedi 10 oct. · 18:00</div></div>
-      </div>
-      <div class="notice notice-warn mt-4 flex-col gap-1">
-        <p class="font-bold">2 autres événements sur ce créneau</p>
-        <p class="text-[15px]"><span class="swatch mr-1.5" style="background-color:#2f6b4f"></span>Fête du vélo, Troyes à Vélo, <span class="tnum">10:00–18:00</span>, place de la Libération</p>
-        <p class="text-[15px]"><span class="swatch mr-1.5" style="background-color:#7a4a7a"></span>Le Malade imaginaire, Compagnie des Remparts, <span class="tnum">15:00–17:00</span></p>
-      </div>
+      <a href="/evenements/ical/public.ics" class="btn btn-secondary">Ajouter à mon agenda</a>
     </div>
   </div>
 </section>
 
-<section class="grid gap-10 py-14 lg:grid-cols-[1fr_2fr] lg:gap-16 lg:py-20">
-  <h2 class="h-section">Ce que vous pouvez faire</h2>
+<section aria-labelledby="planning">
+  <div class="section-head">
+    <h2 id="planning" class="h-section">Planning de la semaine</h2>
+    <a href="/evenements" class="link shrink-0 whitespace-nowrap text-[15px]">Ouvrir l'agenda</a>
+  </div>
+  <%- include('../partials/planning', { planning, list: weekList }) %>
+  <% if (!weekEvents) { %><p class="mt-4 text-ink-2">Aucune date publique cette semaine. <a class="link" href="/evenements/liste">Voir les prochaines</a></p><% } %>
+</section>
+
+<section class="mt-20 grid gap-12 lg:grid-cols-[1fr_2fr] lg:gap-14">
+  <div>
+    <h2 class="h-section">Pourquoi un agenda commun</h2>
+    <p class="mt-4 max-w-prose text-ink-2">À <%= city %>, deux associations organisent souvent le même samedi sans le savoir. Ici, le conflit apparaît au moment où vous saisissez la date, pas le jour J.</p>
+  </div>
   <dl class="grid gap-x-12 gap-y-8 sm:grid-cols-2">
-    <div class="border-t border-ink pt-4">
-      <dt class="font-bold">Publier vos dates</dt>
+    <div class="border-t-2 border-ink pt-3.5">
+      <dt class="font-semibold">Publier vos dates</dt>
       <dd class="mt-1 text-ink-2">En public, ou réservées aux associations pour vos réunions de préparation.</dd>
     </div>
-    <div class="border-t border-ink pt-4">
-      <dt class="font-bold">Rejoindre l'événement d'une autre association</dt>
+    <div class="border-t-2 border-ink pt-3.5">
+      <dt class="font-semibold">Rejoindre l'événement d'une autre</dt>
       <dd class="mt-1 text-ink-2">Co-organiser, tenir un stand, prêter du matériel : c'est affiché sur sa page.</dd>
     </div>
-    <div class="border-t border-ink pt-4">
-      <dt class="font-bold">Demander ou proposer de l'aide</dt>
-      <dd class="mt-1 text-ink-2">Annonces pour les bénévoles, le matériel, les salles et les partenariats.</dd>
+    <div class="border-t-2 border-ink pt-3.5">
+      <dt class="font-semibold">Demander un coup de main</dt>
+      <dd class="mt-1 text-ink-2">Bénévoles, matériel, salles : une annonce, et les autres associations répondent.</dd>
     </div>
-    <div class="border-t border-ink pt-4">
-      <dt class="font-bold">Garder l'agenda dans votre téléphone</dt>
-      <dd class="mt-1 text-ink-2">Un lien à ajouter dans Google Agenda, Outlook ou Calendrier : il se met à jour tout seul.</dd>
+    <div class="border-t-2 border-ink pt-3.5">
+      <dt class="font-semibold">Suivre l'agenda sur votre téléphone</dt>
+      <dd class="mt-1 text-ink-2">Un lien à ajouter dans Google Agenda, Outlook ou Calendrier, mis à jour tout seul.</dd>
     </div>
   </dl>
-  <div class="lg:col-start-2">
-    <a href="/inscription" class="btn btn-primary">Créer un compte</a>
-    <a href="/associations" class="btn btn-quiet ml-1">Voir les associations inscrites</a>
-  </div>
 </section>

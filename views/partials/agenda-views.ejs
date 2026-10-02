@@ -1,0 +1,9 @@
+<%
+  // Sélecteur de vue de l'agenda. Paramètres : current ('semaine'|'mois'|'liste'), filters
+  const f = { association: filters.association, theme: filters.theme, mes: filters.mes };
+%>
+<nav class="seg" aria-label="Affichage de l'agenda">
+  <a href="/evenements<%= query(f, {}) %>" class="<%= current === 'semaine' ? 'active' : '' %>" <%= current === 'semaine' ? 'aria-current=page' : '' %>>Semaine</a>
+  <a href="/evenements/mois<%= query(f, {}) %>" class="<%= current === 'mois' ? 'active' : '' %>" <%= current === 'mois' ? 'aria-current=page' : '' %>>Mois</a>
+  <a href="/evenements/liste<%= query(f, {}) %>" class="<%= current === 'liste' ? 'active' : '' %>" <%= current === 'liste' ? 'aria-current=page' : '' %>>Liste</a>
+</nav>

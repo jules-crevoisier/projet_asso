@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= title ? `${title} · ${platformName}` : platformName %></title>
   <meta name="description" content="L'agenda commun des associations de <%= city %> : publiez vos dates, évitez les doublons, trouvez des bénévoles et du matériel.">
-  <meta name="theme-color" content="#f5f2ea">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#151513" media="(prefers-color-scheme: dark)">
   <meta name="csrf-token" content="<%= csrfToken %>">
   <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="/vendor/atkinson/files/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/vendor/newsreader/files/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/vendor/schibsted/files/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/css/app.css">
   <link rel="alternate" type="text/calendar" title="Événements publics" href="/evenements/ical/public.ics">
   <script src="/static/js/app.js" defer></script>
@@ -20,14 +20,14 @@
   <a href="#contenu" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-surface focus:px-3 focus:py-2">Aller au contenu</a>
   <%- include('partials/header') %>
   <main id="contenu" class="flex-1">
-    <div class="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6 lg:pt-12">
+    <div class="mx-auto w-full max-w-[1440px] px-4 pb-16 pt-8 sm:px-8 lg:px-14 lg:pt-12">
       <%- include('partials/flash') %>
       <%- body %>
     </div>
   </main>
   <footer class="border-t border-line">
-    <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-[14px] text-ink-2 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-      <p><%- include('partials/wordmark', { small: true }) %> <span class="ml-2">L'agenda commun des associations de <%= city %>.</span></p>
+    <div class="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-6 text-[14px] text-ink-2 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-14">
+      <p><%- include('partials/wordmark', { small: true }) %> <span class="ml-1">— l'agenda commun des associations de <%= city %></span></p>
       <nav class="flex flex-wrap gap-x-5 gap-y-1" aria-label="Liens secondaires">
         <a class="link-quiet" href="/evenements">Agenda</a>
         <a class="link-quiet" href="/associations">Annuaire</a>

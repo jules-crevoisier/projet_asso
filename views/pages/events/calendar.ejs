@@ -1,54 +1,27 @@
-<div class="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+<div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
   <div>
+    <p class="kicker mb-3" data-cal-title aria-live="polite">&nbsp;</p>
     <h1 class="h-page">Agenda</h1>
-    <p class="mt-2 max-w-prose text-[17px] text-ink-2">Les dates de toutes les associations de <%= city %>. Les jours chargés sont signalés en rouge.</p>
   </div>
-  <div class="flex flex-wrap gap-2">
+  <div class="flex flex-wrap items-center gap-2">
     <a href="<%= user ? '/profil#agenda' : '/evenements/ical/public.ics' %>" class="btn btn-secondary">Ajouter à mon agenda</a>
-    <% if (user) { %><a href="/evenements/nouveau" class="btn btn-primary">Publier un événement</a><% } %>
+    <% if (user) { %><a href="/evenements/nouveau" class="btn btn-primary">Publier une date</a><% } %>
   </div>
 </div>
 
-<div class="mb-4 flex flex-col gap-4 border-y border-line py-4 lg:flex-row lg:items-center lg:justify-between">
-  <div class="flex flex-wrap items-center gap-3">
-    <div class="flex">
-      <button type="button" class="btn btn-secondary btn-icon rounded-r-none" data-cal="prev" aria-label="Période précédente"><%- icon('ChevronLeft') %></button>
-      <button type="button" class="btn btn-secondary btn-icon -ml-px rounded-l-none" data-cal="next" aria-label="Période suivante"><%- icon('ChevronRight') %></button>
+<div class="mb-4 space-y-3 border-t-2 border-ink py-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <button type="button" class="btn btn-secondary btn-icon" data-cal="prev" aria-label="Mois précédent"><%- icon('ChevronLeft') %></button>
+      <button type="button" class="btn btn-secondary" data-cal="today">Ce mois-ci</button>
+      <button type="button" class="btn btn-secondary btn-icon" data-cal="next" aria-label="Mois suivant"><%- icon('ChevronRight') %></button>
     </div>
-    <button type="button" class="btn btn-secondary" data-cal="today">Aujourd'hui</button>
-    <h2 class="order-first w-full font-serif text-[24px] font-medium first-letter:uppercase sm:order-none sm:ml-1 sm:w-auto sm:whitespace-nowrap" data-cal-title aria-live="polite"></h2>
+    <%- include('../../partials/agenda-views', { current: 'mois' }) %>
   </div>
-  <div class="segmented self-start lg:self-auto" data-cal-views role="group" aria-label="Affichage">
-    <button type="button" data-view="dayGridMonth" class="active">Mois</button>
-    <button type="button" data-view="timeGridWeek">Semaine</button>
-    <button type="button" data-view="listMonth">Liste</button>
-  </div>
+  <%- include('../../partials/agenda-filters', { attrs: 'data-cal-filters' }) %>
 </div>
 
-<form class="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2" data-cal-filters aria-label="Filtres">
-  <label class="sr-only" for="cal-association">Association</label>
-  <select id="cal-association" name="association" class="input w-auto">
-    <option value="">Toutes les associations</option>
-    <% associations.forEach((a) => { %><option value="<%= a.slug %>" <%= filters.association === a.slug ? 'selected' : '' %>><%= a.name %></option><% }) %>
-  </select>
-  <label class="sr-only" for="cal-theme">Thème</label>
-  <select id="cal-theme" name="theme" class="input w-auto">
-    <option value="">Tous les thèmes</option>
-    <% Object.entries(CATEGORIES).forEach(([v, l]) => { %><option value="<%= v %>" <%= filters.theme === v ? 'selected' : '' %>><%= l %></option><% }) %>
-  </select>
-  <% if (user) { %>
-    <label class="toggle ml-1"><input type="checkbox" name="mes" value="1" class="size-4" <%= filters.mes ? 'checked' : '' %>>Seulement mes associations</label>
-  <% } %>
-</form>
+<div id="calendar" data-initial-date="<%= initialDate %>" data-can-create="<%= user ? '1' : '' %>" class="min-h-[640px]"></div>
+<p class="meta mt-3">Une étiquette orange signale un jour avec plusieurs événements.<% if (user) { %> Cliquez sur un jour pour y publier une date.<% } %></p>
 
-<div class="overflow-hidden rounded-lg border border-line bg-surface">
-  <div id="calendar" data-initial-date="<%= initialDate %>" data-can-create="<%= user ? '1' : '' %>" class="min-h-[640px]"></div>
-</div>
-
-<p class="meta mt-3 flex flex-wrap gap-x-6 gap-y-1">
-  <span>Chaque association a sa couleur.</span>
-  <span><span class="mr-1 inline-block h-3 w-5 rounded-[2px] border border-line-strong bg-[repeating-linear-gradient(-45deg,transparent_0_4px,rgba(31,29,26,.18)_4px_5px)] align-[-2px]"></span>Hachuré : réservé aux associations</span>
-  <% if (user) { %><span>Cliquez sur un jour vide pour y publier un événement.</span><% } %>
-</p>
-
-<div id="cal-tooltip" class="pointer-events-none fixed z-50 hidden w-72 rounded-lg border border-line-strong bg-surface p-3.5 text-[14px] shadow-[0_8px_24px_-8px_rgba(31,29,26,0.3)]" role="tooltip"></div>
+<div id="cal-tooltip" class="pointer-events-none fixed z-50 hidden w-72 rounded border border-line-strong bg-surface p-3.5 text-[14px] shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)]" role="tooltip"></div>

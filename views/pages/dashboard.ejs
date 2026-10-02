@@ -1,25 +1,20 @@
-<%
-  // 7 prochains jours
-  const today = parisDateKey();
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(`${today}T12:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + i);
-    const key = d.toISOString().slice(0, 10);
-    return { key, date: d, events: week.filter((e) => parisDateKey(e.start_at) === key) };
-  });
-%>
-<%- include('../partials/page-header', {
-  kicker: fmt.dayHeading(new Date()),
-  heading: 'Tableau de bord',
-  actions: `<a href="/annonces/nouvelle" class="btn btn-secondary">Publier une annonce</a><a href="/evenements/nouveau" class="btn btn-primary">Publier un événement</a>`,
-}) %>
+<div class="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+  <div>
+    <p class="kicker mb-3"><%= fmt.dayHeading(new Date()) %> · semaine <%= weekNumber %></p>
+    <h1 class="h-page">Bonjour <%= user.first_name %></h1>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="/annonces/nouvelle" class="btn btn-secondary">Publier une annonce</a>
+    <a href="/evenements/nouveau" class="btn btn-primary">Publier une date</a>
+  </div>
+</div>
 
 <% if (pending.length) { %>
-  <section id="demandes" class="mb-10 rounded-lg border border-accent/40 bg-surface">
-    <h2 class="border-b border-line px-5 py-3.5 font-bold"><span class="text-accent"><%= plural(pending.length, 'demande') %> d'adhésion</span> à traiter</h2>
-    <ul class="rows">
+  <section id="demandes" class="mb-12" aria-labelledby="demandes-titre">
+    <div class="section-head"><h2 id="demandes-titre" class="h-section"><%= plural(pending.length, 'demande') %> d'adhésion <span class="tag tag-signal ml-1 align-[3px]">À traiter</span></h2></div>
+    <ul class="rows border-t border-line">
       <% pending.forEach((m) => { %>
-        <li class="flex flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center">
+        <li class="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center">
           <div class="min-w-0 flex-1">
             <p><strong><%= m.first_name %> <%= m.last_name %></strong> veut rejoindre <a class="link" href="/associations/<%= m.slug %>"><%= m.association_name %></a></p>
             <% if (m.message) { %><p class="meta mt-0.5">« <%= m.message %> »</p><% } %>
@@ -35,10 +30,10 @@
 <% } %>
 
 <% if (!myAssociations.length) { %>
-  <section class="notice notice-info mb-10 flex-col gap-3 py-5 sm:flex-row sm:items-center">
+  <section class="notice notice-info mb-12 flex-col gap-3 py-5 sm:flex-row sm:items-center">
     <div class="flex-1">
-      <p class="font-bold">Rejoignez votre association pour publier</p>
-      <p class="mt-0.5 text-ink-2">Elle est peut-être déjà inscrite. Sinon, créez sa fiche : un modérateur la vérifiera.<% if (myPending.length) { %> Demande en attente : <%= myPending.map((m) => m.name).join(', ') %>.<% } %></p>
+      <p class="font-semibold">Rejoignez votre association pour publier des dates</p>
+      <p class="mt-0.5 text-ink-2">Elle est peut-être déjà inscrite. Sinon, créez sa fiche : un modérateur la vérifie.<% if (myPending.length) { %> En attente : <%= myPending.map((m) => m.name).join(', ') %>.<% } %></p>
     </div>
     <div class="flex flex-wrap gap-2">
       <a href="/associations" class="btn btn-primary">Trouver mon association</a>
@@ -47,76 +42,70 @@
   </section>
 <% } %>
 
-<section class="mb-12" aria-labelledby="semaine">
-  <div class="mb-4 flex items-baseline justify-between gap-4">
-    <h2 id="semaine" class="h-section">Les 7 prochains jours</h2>
+<section class="mb-16" aria-labelledby="semaine">
+  <div class="section-head">
+    <h2 id="semaine" class="h-section">Planning de la semaine<% if (planning.conflictCount) { %> <span class="text-[15px] font-semibold text-accent">· <%= plural(planning.conflictCount, 'conflit') %></span><% } %></h2>
     <a href="/evenements" class="link shrink-0 whitespace-nowrap text-[15px]">Ouvrir l'agenda</a>
   </div>
-  <ol class="grid overflow-hidden rounded-lg border border-line bg-surface md:grid-cols-7">
-    <% days.forEach((d, i) => { %>
-      <li class="grid grid-cols-[4.5rem_1fr] gap-3 border-line p-3 md:block md:min-h-36 <%= i ? 'border-t md:border-l md:border-t-0' : '' %> <%= d.events.length > 1 ? 'bg-accent-soft/40' : '' %>">
-        <p class="flex items-baseline justify-between gap-2 md:mb-2">
-          <span><span class="kicker <%= i === 0 ? 'text-accent' : '' %>"><%= i === 0 ? 'Auj.' : fmt.weekdayShort(d.date) %></span> <span class="tnum text-[20px] font-medium"><%= d.date.getUTCDate() %></span></span>
-          <% if (d.events.length > 1) { %><span class="hidden text-[12px] font-bold text-accent md:inline"><%= d.events.length %> év.</span><% } %>
-        </p>
-        <ul class="space-y-1.5 self-center">
-          <% d.events.forEach((e) => { %>
-            <li><a href="/evenements/<%= e.id %>" class="block rounded-[3px] border-l-[3px] px-2 py-1 text-[13px] leading-tight hover:brightness-95" style="border-color: <%= e.association_color %>; background: <%= tint(e.association_color) %>"><span class="tnum text-ink-2"><%= fmt.time(e.start_at) %></span> <span class="font-semibold"><%= e.title %></span></a></li>
-          <% }) %>
-          <% if (!d.events.length) { %><li class="text-[13px] text-ink-3">Libre</li><% } %>
-        </ul>
-      </li>
-    <% }) %>
-  </ol>
+  <%- include('../partials/planning', { planning, list: weekList, canCreate: true }) %>
+  <% if (!weekEvents) { %><p class="mt-4 text-ink-2">Aucune date cette semaine. <a class="link" href="/evenements/nouveau">Publier la vôtre</a></p><% } %>
 </section>
 
-<div class="grid gap-x-12 gap-y-12 lg:grid-cols-[2fr_1fr]">
-  <section aria-labelledby="mes-evenements">
-    <div class="mb-4 flex items-baseline justify-between gap-4 border-b border-ink pb-2">
-      <h2 id="mes-evenements" class="h-section"><%= myAssociations.length ? 'Événements de vos associations' : 'Prochainement' %></h2>
+<div class="grid gap-x-14 gap-y-14 lg:grid-cols-[2fr_1fr]">
+  <section aria-labelledby="prochains">
+    <div class="section-head">
+      <h2 id="prochains" class="h-section"><%= myAssociations.length ? 'Prochaines dates de vos associations' : 'Prochainement' %></h2>
       <a href="/evenements/liste<%= myAssociations.length ? '?mes=1' : '' %>" class="link shrink-0 whitespace-nowrap text-[15px]">Tout voir</a>
     </div>
     <% const list = myAssociations.length ? myEvents : upcoming; %>
     <% if (list.length) { %>
-      <%- include('../partials/agenda', { events: list, showCount: false }) %>
+      <div class="rows border-t border-line">
+        <% list.forEach((e) => { %>
+          <div class="group relative grid grid-cols-[7.5rem_1fr] gap-x-4 py-3.5 sm:grid-cols-[11.5rem_1fr]">
+            <span class="text-[15px] text-ink-2"><%= fmt.date(e.start_at).replace(/^./, (c) => c.toUpperCase()) %><br><span class="tnum"><%= fmt.hour(e.start_at) %></span></span>
+            <div class="flex min-w-0 gap-3">
+              <span class="swatch mt-1.5" style="background-color: <%= e.association_color %>"></span>
+              <div class="min-w-0">
+                <a href="/evenements/<%= e.id %>" class="text-[17px] font-semibold after:absolute after:inset-0 group-hover:underline group-hover:decoration-1 group-hover:underline-offset-[3px]"><%= e.title %></a>
+                <p class="text-[15px] text-ink-2"><%= e.association_name %> · <%= e.location %></p>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
     <% } else { %>
-      <p class="py-6 text-ink-2">Rien de prévu pour l'instant. <a class="link" href="/evenements/nouveau">Ajouter une date</a></p>
+      <p class="border-t border-line py-5 text-ink-2">Rien de prévu. <a class="link" href="/evenements/nouveau">Publier une date</a></p>
     <% } %>
   </section>
 
-  <aside class="space-y-10">
+  <aside class="space-y-12">
     <% if (myAssociations.length) { %>
       <section>
-        <h2 class="mb-3 border-b border-ink pb-2 h-block">Vos associations</h2>
-        <ul class="space-y-1">
+        <div class="section-head"><h2 class="h-section">Vos associations</h2></div>
+        <ul class="rows border-t border-line">
           <% myAssociations.forEach((a) => { %>
-            <li class="flex items-center gap-3 py-1.5">
-              <span class="swatch size-3" style="background-color: <%= a.color %>"></span>
-              <a class="link-quiet min-w-0 flex-1 truncate" href="/associations/<%= a.slug %>"><%= a.name %></a>
+            <li class="flex items-center gap-3 py-3">
+              <span class="swatch" style="background-color: <%= a.color %>"></span>
+              <a class="link-quiet min-w-0 flex-1 truncate font-medium" href="/associations/<%= a.slug %>"><%= a.name %></a>
               <% if (!a.can_publish) { %><span class="tag tag-warn">En validation</span><% } %>
             </li>
           <% }) %>
         </ul>
       </section>
     <% } %>
-
     <% if (volunteering.length) { %>
       <section>
-        <h2 class="mb-3 border-b border-ink pb-2 h-block">Vous êtes bénévole</h2>
-        <ul class="space-y-2">
-          <% volunteering.forEach((v) => { %><li><a class="link-quiet font-semibold" href="/evenements/<%= v.id %>"><%= v.title %></a><p class="meta tnum"><%= fmt.short(v.start_at) %></p></li><% }) %>
+        <div class="section-head"><h2 class="h-section">Vous êtes bénévole</h2></div>
+        <ul class="rows border-t border-line">
+          <% volunteering.forEach((v) => { %><li class="py-3"><a class="link-quiet font-medium" href="/evenements/<%= v.id %>"><%= v.title %></a><p class="meta"><%= fmt.date(v.start_at) %>, <%= fmt.hour(v.start_at) %></p></li><% }) %>
         </ul>
       </section>
     <% } %>
-
     <section>
-      <div class="mb-1 flex items-baseline justify-between border-b border-ink pb-2">
-        <h2 class="h-block">Annonces récentes</h2>
-        <a href="/annonces" class="link shrink-0 whitespace-nowrap text-[15px]">Toutes</a>
-      </div>
-      <div class="rows -mx-5">
-        <% if (posts.length) { posts.forEach((post) => { %><%- include('../partials/post-row', { post }) %><% }) } else { %>
-          <p class="px-5 py-6 text-ink-2">Aucune annonce. <a class="link" href="/annonces/nouvelle">Demander un coup de main</a></p>
+      <div class="section-head"><h2 class="h-section">Annonces</h2><a href="/annonces" class="link shrink-0 whitespace-nowrap text-[15px]">Toutes</a></div>
+      <div class="rows border-t border-line">
+        <% if (posts.length) { posts.forEach((post) => { %><%- include('../partials/post-row', { post, compact: true }) %><% }) } else { %>
+          <p class="py-5 text-ink-2">Aucune annonce. <a class="link" href="/annonces/nouvelle">Demander un coup de main</a></p>
         <% } %>
       </div>
     </section>

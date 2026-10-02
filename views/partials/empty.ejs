@@ -1,5 +1,5 @@
 <div class="px-5 py-10 <%= locals.center ? 'text-center' : '' %>">
-  <p class="font-serif text-[20px] font-medium"><%= locals.heading || 'Rien pour le moment' %></p>
+  <p class="text-[20px] font-bold tracking-[-0.02em]"><%= locals.heading || 'Rien pour le moment' %></p>
   <% if (locals.text) { %><p class="mt-1 max-w-prose text-ink-2 <%= locals.center ? 'mx-auto' : '' %>"><%= text %></p><% } %>
   <% if (locals.actionHref) { %><a href="<%= actionHref %>" class="btn btn-secondary mt-5"><%= actionLabel %></a><% } %>
 </div>

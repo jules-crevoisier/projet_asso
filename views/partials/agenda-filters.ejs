@@ -1,0 +1,15 @@
+<form method="get" class="flex flex-wrap items-center gap-x-3 gap-y-2" data-autosubmit <%- locals.attrs || '' %>>
+  <% (locals.hidden || []).forEach(([k, v]) => { %><input type="hidden" name="<%= k %>" value="<%= v %>"><% }) %>
+  <label class="sr-only" for="flt-association">Association</label>
+  <select id="flt-association" name="association" class="input w-auto">
+    <option value="">Toutes les associations</option>
+    <% associations.forEach((a) => { %><option value="<%= a.slug %>" <%= filters.association === a.slug ? 'selected' : '' %>><%= a.name %></option><% }) %>
+  </select>
+  <label class="sr-only" for="flt-theme">Thème</label>
+  <select id="flt-theme" name="theme" class="input w-auto">
+    <option value="">Tous les thèmes</option>
+    <% Object.entries(CATEGORIES).forEach(([v, l]) => { %><option value="<%= v %>" <%= filters.theme === v ? 'selected' : '' %>><%= l %></option><% }) %>
+  </select>
+  <% if (user) { %><label class="toggle ml-1"><input type="checkbox" name="mes" value="1" class="size-4" <%= filters.mes ? 'checked' : '' %>>Seulement mes associations</label><% } %>
+  <noscript><button class="btn btn-secondary">Filtrer</button></noscript>
+</form>

@@ -25,13 +25,13 @@ function seed(db = openDatabase()) {
     const blank = { description: '', email: '', phone: '', website: '', address: '' };
     const asso = (owner, data, validated = true) => m.associations.create({ ...blank, ...data }, owner.id, validated);
 
-    const velo = asso(u.camille, { name: 'Troyes à Vélo', category: 'environnement', color: '#2f6b4f', short_description: 'Promouvoir le vélo au quotidien dans l’agglomération troyenne.', description: 'Ateliers de réparation participatifs, balades mensuelles, plaidoyer pour des aménagements cyclables.', email: 'contact@velo.exemple.fr', address: 'Quai des Comtes de Champagne' });
-    const theatre = asso(u.yanis, { name: 'Compagnie des Remparts', category: 'culture', color: '#7a4a7a', short_description: 'Troupe de théâtre amateur et ateliers pour tous les âges.', email: 'bonjour@remparts.exemple.fr', website: 'https://remparts.exemple.fr' });
-    const solidarite = asso(u.lea, { name: 'Solidarité Seine', category: 'social', color: '#b4532a', short_description: 'Aide alimentaire et accompagnement des familles.', phone: '03 25 00 00 00' });
-    const foot = asso(u.hugo, { name: 'Étoile Sportive Saint-Julien', category: 'sport', color: '#4a6a8c', short_description: 'Club de football pour les 6–17 ans.' });
-    const jardin = asso(u.ines, { name: 'Jardins Partagés du Vouldy', category: 'quartier', color: '#66682c', short_description: 'Potagers collectifs, ateliers compost et fêtes de quartier.' });
-    const musique = asso(u.sarah, { name: 'Les Voix de Champagne', category: 'culture', color: '#a8445e', short_description: 'Chorale ouverte à tous, sans audition.' });
-    asso(u.tom, { name: 'Les Amis de la Médiathèque', category: 'culture', color: '#94691c', short_description: 'Club de lecture et rencontres d’auteurs.' }, false);
+    const velo = asso(u.camille, { name: 'Troyes à Vélo', category: 'environnement', color: '#8fd6cf', short_description: 'Promouvoir le vélo au quotidien dans l’agglomération troyenne.', description: 'Ateliers de réparation participatifs, balades mensuelles, plaidoyer pour des aménagements cyclables.', email: 'contact@velo.exemple.fr', address: 'Quai des Comtes de Champagne' });
+    const theatre = asso(u.yanis, { name: 'Compagnie des Remparts', category: 'culture', color: '#c9b3f0', short_description: 'Troupe de théâtre amateur et ateliers pour tous les âges.', email: 'bonjour@remparts.exemple.fr', website: 'https://remparts.exemple.fr' });
+    const solidarite = asso(u.lea, { name: 'Solidarité Seine', category: 'social', color: '#f5c3a0', short_description: 'Aide alimentaire et accompagnement des familles.', phone: '03 25 00 00 00' });
+    const foot = asso(u.hugo, { name: 'Étoile Sportive Saint-Julien', category: 'sport', color: '#9cc9f5', short_description: 'Club de football pour les 6–17 ans.' });
+    const jardin = asso(u.ines, { name: 'Jardins Partagés du Vouldy', category: 'quartier', color: '#a9d99a', short_description: 'Potagers collectifs, ateliers compost et fêtes de quartier.' });
+    const musique = asso(u.sarah, { name: 'Les Voix de Champagne', category: 'culture', color: '#f2afc1', short_description: 'Chorale ouverte à tous, sans audition.' });
+    asso(u.tom, { name: 'Les Amis de la Médiathèque', category: 'culture', color: '#e8d77a', short_description: 'Club de lecture et rencontres d’auteurs.' }, false);
 
     const join = (user, a, role = 'member') => {
       m.memberships.request(user.id, a.id, '');

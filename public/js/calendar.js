@@ -65,7 +65,7 @@
       events: { url: '/api/evenements', extraParams: params },
       loading: (isLoading) => el.classList.toggle('opacity-60', isLoading),
       datesSet: (info) => {
-        title.textContent = info.view.title;
+        title.textContent = info.view.title.replace(/^./, (c) => c.toUpperCase());
         setActiveView(info.view.type);
       },
       eventsSet: markBusyDays,
@@ -76,7 +76,7 @@
       },
       eventContent: (arg) => {
         if (arg.view.type.startsWith('list')) return true;
-        return { html: `<div class="truncate"><span class="ev-time">${escapeHtml(arg.timeText)}</span> <span class="font-semibold">${escapeHtml(arg.event.title)}</span></div>` };
+        return { html: `<div class="truncate"><span class="tabular-nums opacity-75">${escapeHtml(arg.timeText)}</span> <span class="font-semibold">${escapeHtml(arg.event.title)}</span></div>` };
       },
       eventDidMount: (arg) => {
         if (!arg.view.type.startsWith('list')) return;
@@ -98,8 +98,8 @@
         ].filter(Boolean);
         tooltip.innerHTML = `
           <p class="flex items-center gap-2 text-[13px] font-bold text-ink-2"><span class="inline-block size-2.5 rounded-[2px]" style="background:${escapeHtml(p.color)}"></span>${escapeHtml(p.association)}</p>
-          <p class="mt-1 font-serif text-[18px] font-semibold leading-snug text-ink">${escapeHtml(e.title)}</p>
-          <p class="tnum mt-1 text-[15px] text-ink">${escapeHtml(when)}</p>
+          <p class="mt-1 text-[17px] font-bold leading-snug text-ink">${escapeHtml(e.title)}</p>
+          <p class="tnum mt-1 text-[15px] text-ink-2">${escapeHtml(when)}</p>
           <dl class="mt-2 space-y-0.5 text-[14px]">${rows.map(([k, v]) => `<div class="flex gap-2"><dt class="w-20 shrink-0 text-ink-3">${escapeHtml(k)}</dt><dd class="text-ink">${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
         tooltip.classList.remove('hidden');
         const r = arg.el.getBoundingClientRect();

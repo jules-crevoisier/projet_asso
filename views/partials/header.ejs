@@ -1,28 +1,28 @@
 <%
   const nav = [
-    { href: '/evenements', label: 'Agenda', on: path === '/evenements' || /^\/evenements\/(\d|nouveau|liste)/.test(path) },
+    ...(user ? [{ href: '/tableau-de-bord', label: 'Tableau de bord', on: path === '/tableau-de-bord', count: pendingRequests }] : []),
+    { href: '/evenements', label: 'Agenda', on: path.startsWith('/evenements') },
     ...(user ? [{ href: '/annonces', label: 'Annonces', on: path.startsWith('/annonces') }] : []),
     { href: '/associations', label: 'Associations', on: path.startsWith('/associations') && !path.startsWith('/associations/moderation') },
     ...(user && user.is_staff ? [{ href: '/associations/moderation', label: 'Modération', on: path.startsWith('/associations/moderation'), count: pendingValidation }] : []),
   ];
 %>
-<header class="border-b border-line bg-paper" data-header>
-  <div class="mx-auto flex max-w-6xl items-center gap-8 px-4 sm:px-6">
-    <a href="<%= user ? '/tableau-de-bord' : '/' %>" class="flex min-h-16 items-center" aria-label="<%= platformName %>, accueil"><%- include('wordmark') %></a>
+<header class="border-b border-line" data-header>
+  <div class="mx-auto grid h-[72px] max-w-[1440px] grid-cols-[1fr_auto] items-center gap-6 px-4 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:px-14">
+    <a href="<%= user ? '/tableau-de-bord' : '/' %>" class="justify-self-start" aria-label="<%= platformName %>, accueil"><%- include('wordmark') %></a>
 
-    <nav class="hidden items-stretch gap-6 self-stretch md:flex" aria-label="Navigation principale">
-      <% if (user) { %><a href="/tableau-de-bord" class="nav-item <%= path === '/tableau-de-bord' ? 'active' : '' %>" <%= path === '/tableau-de-bord' ? 'aria-current=page' : '' %>>Tableau de bord<% if (pendingRequests) { %><span class="ml-1.5 rounded bg-accent px-1.5 text-[12px] font-bold text-surface"><%= pendingRequests %></span><% } %></a><% } %>
+    <nav class="hidden items-stretch gap-8 self-stretch lg:flex" aria-label="Navigation principale">
       <% nav.forEach((n) => { %>
-        <a href="<%= n.href %>" class="nav-item <%= n.on ? 'active' : '' %>" <%= n.on ? 'aria-current=page' : '' %>><%= n.label %><% if (n.count) { %><span class="ml-1.5 rounded bg-accent px-1.5 text-[12px] font-bold text-surface"><%= n.count %></span><% } %></a>
+        <a href="<%= n.href %>" class="nav-item <%= n.on ? 'active' : '' %>" <%= n.on ? 'aria-current=page' : '' %>><%= n.label %><% if (n.count) { %><span class="tag tag-signal ml-1.5"><%= n.count %></span><% } %></a>
       <% }) %>
     </nav>
 
-    <div class="ml-auto hidden items-center gap-2 md:flex">
+    <div class="hidden items-center gap-2 justify-self-end lg:flex">
       <% if (user) { %>
         <div class="relative" data-dropdown>
-          <button type="button" class="btn btn-primary" data-dropdown-toggle aria-haspopup="true" aria-expanded="false"><%- icon('Plus') %>Publier</button>
+          <button type="button" class="btn btn-primary" data-dropdown-toggle aria-haspopup="true" aria-expanded="false">Publier</button>
           <div class="menu right-0 top-full mt-2" data-dropdown-menu>
-            <a href="/evenements/nouveau" class="menu-item">Un événement dans l'agenda</a>
+            <a href="/evenements/nouveau" class="menu-item">Une date dans l'agenda</a>
             <a href="/annonces/nouvelle" class="menu-item">Une annonce</a>
             <a href="/associations/nouvelle" class="menu-item">Une nouvelle association</a>
           </div>
@@ -30,10 +30,10 @@
         <div class="relative" data-dropdown>
           <button type="button" class="btn btn-quiet gap-2.5 px-2" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-label="Mon compte">
             <span class="avatar size-8"><%= initials(user.first_name, user.last_name) %></span>
-            <span class="max-w-36 truncate"><%= user.first_name %></span><%- icon('ChevronDown', 'size-4 text-ink-3') %>
+            <span class="max-w-36 truncate"><%= user.first_name %></span>
           </button>
           <div class="menu right-0 top-full mt-2" data-dropdown-menu>
-            <p class="truncate border-b border-line px-3 pb-2 pt-1.5 text-[14px] text-ink-3"><%= user.email %></p>
+            <p class="truncate border-b border-line px-3 pb-2 pt-1.5 text-[14px] text-ink-2"><%= user.email %></p>
             <a href="/profil" class="menu-item mt-1">Mon profil</a>
             <a href="/profil#agenda" class="menu-item">Abonner mon agenda</a>
             <form method="post" action="/deconnexion"><%- include('csrf') %><button class="menu-item">Se déconnecter</button></form>
@@ -41,24 +41,23 @@
         </div>
       <% } else { %>
         <a href="/connexion" class="btn btn-quiet">Se connecter</a>
-        <a href="/inscription" class="btn btn-primary">Créer un compte</a>
+        <a href="/inscription" class="btn btn-primary">Inscrire mon association</a>
       <% } %>
     </div>
 
-    <button type="button" class="btn btn-secondary btn-sm ml-auto md:hidden" data-menu-toggle aria-expanded="false" aria-controls="menu-mobile">Menu</button>
+    <button type="button" class="btn btn-secondary btn-sm justify-self-end lg:hidden" data-menu-toggle aria-expanded="false" aria-controls="menu-mobile">Menu</button>
   </div>
 
-  <nav id="menu-mobile" class="hidden border-t border-line px-4 pb-4 pt-2 md:hidden" aria-label="Navigation principale">
-    <% if (user) { %><a href="/tableau-de-bord" class="side-link <%= path === '/tableau-de-bord' ? 'active' : '' %>">Tableau de bord<% if (pendingRequests) { %><span class="tag tag-accent"><%= pendingRequests %></span><% } %></a><% } %>
-    <% nav.forEach((n) => { %><a href="<%= n.href %>" class="side-link <%= n.on ? 'active' : '' %>"><%= n.label %><% if (n.count) { %><span class="tag tag-accent"><%= n.count %></span><% } %></a><% }) %>
+  <nav id="menu-mobile" class="hidden border-t border-line px-4 pb-4 pt-2 lg:hidden" aria-label="Navigation principale">
+    <% nav.forEach((n) => { %><a href="<%= n.href %>" class="side-link <%= n.on ? 'active' : '' %>"><%= n.label %><% if (n.count) { %><span class="tag tag-signal"><%= n.count %></span><% } %></a><% }) %>
     <div class="mt-3 border-t border-line pt-3">
       <% if (user) { %>
-        <a href="/evenements/nouveau" class="btn btn-primary w-full">Publier un événement</a>
+        <a href="/evenements/nouveau" class="btn btn-primary w-full">Publier une date</a>
         <a href="/annonces/nouvelle" class="side-link mt-2">Publier une annonce</a>
         <a href="/profil" class="side-link">Mon profil (<%= user.first_name %>)</a>
         <form method="post" action="/deconnexion"><%- include('csrf') %><button class="side-link w-full">Se déconnecter</button></form>
       <% } else { %>
-        <a href="/inscription" class="btn btn-primary w-full">Créer un compte</a>
+        <a href="/inscription" class="btn btn-primary w-full">Inscrire mon association</a>
         <a href="/connexion" class="btn btn-secondary mt-2 w-full">Se connecter</a>
       <% } %>
     </div>

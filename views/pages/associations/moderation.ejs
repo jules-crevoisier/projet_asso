@@ -5,7 +5,7 @@
     <% pending.forEach((a) => { %>
       <li class="flex flex-col gap-4 py-5 sm:flex-row sm:items-start">
         <div class="min-w-0 flex-1">
-          <h2 class="font-sans text-[17px] font-bold"><a class="link-quiet" href="/associations/<%= a.slug %>"><%= a.name %></a></h2>
+          <h2 class="text-[17px] font-semibold"><a class="link-quiet" href="/associations/<%= a.slug %>"><%= a.name %></a></h2>
           <p class="mt-0.5 max-w-prose text-ink-2"><%= a.short_description %></p>
           <p class="meta mt-1"><%= CATEGORIES[a.category] %> · inscrite <%= fmt.ago(a.created_at) %><% if (a.creator_email) { %> par <%= a.first_name %> <%= a.last_name %>, <a class="link-quiet" href="mailto:<%= a.creator_email %>"><%= a.creator_email %></a><% } %></p>
         </div>
